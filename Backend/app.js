@@ -16,3 +16,13 @@ app.use(cors({
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
 app.use(express.json());
+
+
+// Routes
+import authRoutes from './Routes/authRoutes.js';
+import userRoutes from './Routes/userRoutes.js';
+import transactionRoutes from './Routes/transactionRoutes.js';
+
+app.use('/api/v1/auth',authRoutes);
+app.use('/api/v1/transaction',transactionRoutes);
+app.use('/api/v1/user',userRoutes);

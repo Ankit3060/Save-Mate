@@ -16,14 +16,19 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: function(){
+        required: function () {
             return this.authType === 'Local';
         },
         select: false,
     },
+    phone: {
+        type: Number,
+        required: false,
+        unique: true,
+    },
     googleId: {
         type: String,
-        required: function(){
+        required: function () {
             return this.authType === 'Google';
         }
     },
@@ -32,7 +37,7 @@ const userSchema = new mongoose.Schema({
         enum: ['Local', 'Google'],
         default: 'Local'
     },
-    role:{
+    role: {
         type: String,
         enum: ['User', 'Admin'],
         default: 'User'
@@ -42,6 +47,10 @@ const userSchema = new mongoose.Schema({
         url: String,
     },
     notified: {
+        type: Boolean,
+        default: false
+    },
+    accountVerified: {
         type: Boolean,
         default: false
     },
@@ -60,8 +69,14 @@ const userSchema = new mongoose.Schema({
         default: 0,
         max: 5
     },
-    resetPasswordToken: String,
-    resetPasswordTokenExpire: Date,
+    resetPasswordToken: {
+        type: String,
+        select: false
+    },
+    resetPasswordTokenExpire: {
+        type: Date,
+        select: false
+    },
     resetTokenGeneratedTime: {
         type: Number,
         default: 0,
@@ -71,15 +86,15 @@ const userSchema = new mongoose.Schema({
         type: Date,
     },
     refreshToken: {
-        type: String
+        type: String,
     },
-},{ timestamps: true });
+}, { timestamps: true });
 
 
-userSchema.methods.generateVerificationCode = function(){
+userSchema.methods.generateVerificationCode = function () {
     function generateRandomSixDigitCode() {
         const firstNumber = Math.floor(Math.random() * 9) + 1;
-        const remainingNumber = Math.floor(Math.random() * 100000).toString().padStart(4, 0);
+        const remainingNumber = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
         return parseInt(firstNumber + remainingNumber);
     }
     const verificationCode = generateRandomSixDigitCode();
@@ -90,9 +105,9 @@ userSchema.methods.generateVerificationCode = function(){
 }
 
 
-userSchema.methods.generateAccessToken = function(){
+userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
-        { id: this._id }, 
+        { id: this._id },
         process.env.ACCESS_TOKEN_KEY,
         {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
@@ -100,7 +115,7 @@ userSchema.methods.generateAccessToken = function(){
     )
 }
 
-userSchema.methods.generateRefreshToken = function(){
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         { id: this._id },
         process.env.REFRESH_TOKEN_KEY,
