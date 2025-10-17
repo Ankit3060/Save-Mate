@@ -8,7 +8,7 @@ export const app = express();
 config({path: "./Config/config.env"});
 
 app.use(cors({
-    origin : "http://localhost:5173",
+    origin : process.env.FRONTEND_URL,
     methods : ["GET","POST","PUT","DELETE", "PATCH"],
     credentials : true
 }));
@@ -26,3 +26,16 @@ import transactionRoutes from './Routes/transactionRoutes.js';
 app.use('/api/v1/auth',authRoutes);
 app.use('/api/v1/transaction',transactionRoutes);
 app.use('/api/v1/user',userRoutes);
+
+
+
+// Cron Jobs
+import {removeUnverifiedOTP} from './Services/removeUnverifiedOTP.js';
+import {removeUnverifiedTokens} from './Services/removeUnverifiedResetToken.js';
+import {updateTokenAttempt} from './Services/updateTokenAttempt.js';
+import {updateOtpAttempt} from './Services/updateOtpAttempt.js';
+
+removeUnverifiedOTP();
+removeUnverifiedTokens();
+updateTokenAttempt();
+updateOtpAttempt();

@@ -3,7 +3,7 @@ import { User } from '../Model/userModel.js';
 
 export const isAuthenticated = async (req, res, next) => {
     try {
-        const {token} = req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.header('Authorization')?.replace('Bearer ', '');
         if(!token){
             return res.status(401).json({
                 message: "Please login to access this resource",

@@ -4,7 +4,10 @@ import {
     getAllTransactions,
     getTransactionById,
     updateTransactionById,
-    deleteTransactionById,
+    permanentDeleteTransaction,
+    restoreTransactionFromTrash,
+    getTrashedTransactions,
+    moveTransactionToTrash,
     getDashboardStats,
     getMonthlyBreakdown,
     getYearlyBreakdown,
@@ -12,18 +15,34 @@ import {
 } from "../Controller/transactionController.js";
 import express from "express";
 
+import { isAuthenticated } from "../Middlewares/authMiddleware.js";
+
 const router = express.Router();
 
-router.post("/add", addNewTransaction);
-router.get("/categories", getTransactionCategories);
-router.get("/all", getAllTransactions);
-router.get("/get-transaction/:id", getTransactionById);
-router.put("/update-transaction/:id", updateTransactionById);
-router.delete("/delete-transaction/:id", deleteTransactionById);
-router.get("/dashboard-stats", getDashboardStats);
-router.get("/monthly-breakdown", getMonthlyBreakdown);
-router.get("/yearly-breakdown", getYearlyBreakdown);
-router.get("/overall-breakdown", getOverallBreakdown);
+// Add and Update Routes
+router.post("/add", isAuthenticated, addNewTransaction);
+router.put("/update-transaction/:id", isAuthenticated, updateTransactionById);
+
+
+// Get Routes
+router.get("/categories", isAuthenticated, getTransactionCategories);
+router.get("/all", isAuthenticated, getAllTransactions);
+router.get("/get-transaction/:id", isAuthenticated, getTransactionById);
+
+
+// Delete Routes
+router.delete("/delete-transaction/:id", isAuthenticated, permanentDeleteTransaction);
+router.patch('/restore/:id', restoreTransactionFromTrash);
+router.delete('/delete-temp/:id', moveTransactionToTrash);
+router.get('/trash', getTrashedTransactions);
+
+
+// Stats Routes
+router.get("/dashboard-stats", isAuthenticated, getDashboardStats);
+router.get("/monthly-breakdown", isAuthenticated, getMonthlyBreakdown);
+router.get("/yearly-breakdown", isAuthenticated, getYearlyBreakdown);
+router.get("/overall-breakdown", isAuthenticated, getOverallBreakdown);
+
 
 
 export default router;

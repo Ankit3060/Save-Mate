@@ -1,6 +1,7 @@
 import { Transaction } from "../Model/transactionModel.js";
 import { User } from "../Model/userModel.js";
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "../Constant/category.js";
+import mongoose from "mongoose";
 
 
 export const addNewTransaction = async (req, res) => {
@@ -83,12 +84,12 @@ export const getAllTransactions = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        const transactions = await Transaction.find({ user: userId })
+        const transactions = await Transaction.find({ user: userId, isDeleted: false})
             .sort({ date: -1 })
             .skip(skip)
             .limit(limit);
 
-        const total = await Transaction.countDocuments({ user: userId });
+        const total = await Transaction.countDocuments({ user: userId, isDeleted: false });
 
         return res.status(200).json({
             statusCode: 200,
@@ -130,7 +131,7 @@ export const getTransactionById = async (req, res) => {
             });
         }
 
-        const transaction = await Transaction.findOne({ _id: transactionId, user: userId });
+        const transaction = await Transaction.findOne({ _id: transactionId, user: userId, isDeleted: false });
         if (!transaction) {
             return res.status(404).json({
                 statusCode: 404,
@@ -183,9 +184,9 @@ export const updateTransactionById = async (req, res) => {
         }
 
         const transaction = await Transaction.findOneAndUpdate(
-            { _id: transactionId, user: userId },
-            { date, type, category, amount, description },
-            { new: true, runValidators: true }
+            { _id: transactionId, user: userId, isDeleted: false },
+            { date, type, category, amount, description },  
+            {new: true}
         );
 
         if (!transaction) {
@@ -212,7 +213,107 @@ export const updateTransactionById = async (req, res) => {
 
 
 
-export const deleteTransactionById = async (req, res) => {
+export const moveTransactionToTrash = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const transactionId = req.params.id;
+        if (!userId) {
+            return res.status(401).json({
+                statusCode: 401,
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+        if (!transactionId) {
+            return res.status(400).json({
+                statusCode: 400,
+                success: false,
+                message: "Transaction ID is required",
+            });
+        }
+
+        const transaction = await Transaction.findOneAndUpdate(
+            { _id: transactionId, user: userId, isDeleted: false },
+            { $set: { isDeleted: true, deletedAt: new Date() } },
+            { new: true }
+        )
+        if (!transaction) {
+            return res.status(404).json({
+                statusCode: 404,
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        return res.status(200).json({
+            statusCode: 200,
+            success: true,
+            message: "Transaction moved to trash successfully",
+            data: transaction,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            statusCode: 500,
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+
+
+export const restoreTransactionFromTrash = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const transactionId = req.params.id;
+        if (!userId) {
+            return res.status(401).json({
+                statusCode: 401,
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+        if (!transactionId) {
+            return res.status(400).json({
+                statusCode: 400,
+                success: false,
+                message: "Transaction ID is required",
+            });
+        }
+
+        const transaction = await Transaction.findOneAndUpdate(
+            { _id: transactionId, user: userId, isDeleted: true },
+            { $set: { isDeleted: false }, $unset: { deletedAt: "" } },
+            { new: true }
+        );
+
+        if(!transaction) {
+            return res.status(404).json({
+                statusCode: 404,
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        return res.status(200).json({
+            statusCode: 200,
+            success: true,
+            message: "Transaction restored from trash successfully",
+            data: transaction,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            statusCode: 500,
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+
+
+export const permanentDeleteTransaction = async (req, res) => {
     try {
         const userId = req.user?.id;
         if (!userId) {
@@ -231,20 +332,20 @@ export const deleteTransactionById = async (req, res) => {
             });
         }
 
-        const transaction = await Transaction.findOneAndDelete({ _id: transactionId, user: userId });
+        const transaction = await Transaction.findOneAndDelete({ _id: transactionId, user: userId, isDeleted: true });
 
         if (!transaction) {
             return res.status(404).json({
                 statusCode: 404,
                 success: false,
-                message: "Transaction not found or you do not have permission to delete it.",
+                message: "Transaction not found in trash or you do not have permission to delete it.",
             });
         }
 
         return res.status(200).json({
             statusCode: 200,
             success: true,
-            message: "Transaction deleted Successfully"
+            message: "Transaction deleted permanently"
         })
     } catch (error) {
         return res.status(500).json({
@@ -255,6 +356,31 @@ export const deleteTransactionById = async (req, res) => {
     }
 };
 
+
+
+export const getTrashedTransactions = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const trashedTransactions = await Transaction.find({ user: userId, isDeleted: true })
+            .sort({ deletedAt: -1 });
+
+        return res.status(200).json({
+            statusCode: 200,
+            success: true,
+            data: trashedTransactions
+        });
+    } catch (error) {
+        return res.status(500).json({
+            statusCode: 500,
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 
 
@@ -272,7 +398,8 @@ export const getDashboardStats = async (req, res) => {
                 // Step 1: Filter documents to the requested user, year, and month
                 $match: {
                     user: new mongoose.Types.ObjectId(userId),
-                    date: { $gte: startDate, $lt: endDate }
+                    date: { $gte: startDate, $lt: endDate },
+                    isDeleted: false
                 }
             },
             {
@@ -347,7 +474,6 @@ export const getDashboardStats = async (req, res) => {
 
 
 
-
 export const getMonthlyBreakdown = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -364,7 +490,8 @@ export const getMonthlyBreakdown = async (req, res) => {
                 // Step 1: Find all transactions for the user within the specified month
                 $match: {
                     user: new mongoose.Types.ObjectId(userId),
-                    date: { $gte: startDate, $lt: endDate }
+                    date: { $gte: startDate, $lt: endDate },
+                    isDeleted: false
                 }
             },
             {
@@ -387,7 +514,7 @@ export const getMonthlyBreakdown = async (req, res) => {
                 // Step 4: Make the output cleaner
                 $project: {
                     _id: 0,
-                    week: `Week ${_id}`,
+                    week: { $concat: ["Week ", { $toString: "$_id" }] },
                     totalIncome: 1,
                     totalExpense: 1
                 }
@@ -411,7 +538,6 @@ export const getMonthlyBreakdown = async (req, res) => {
 
 
 
-
 export const getYearlyBreakdown = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -425,7 +551,8 @@ export const getYearlyBreakdown = async (req, res) => {
                 // Step 1: Match transactions for the user within the specified year
                 $match: {
                     user: new mongoose.Types.ObjectId(userId),
-                    date: { $gte: startDate, $lt: endDate }
+                    date: { $gte: startDate, $lt: endDate },
+                    isDeleted: false
                 }
             },
             {
@@ -472,7 +599,6 @@ export const getYearlyBreakdown = async (req, res) => {
 
 
 
-
 export const getOverallBreakdown = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -481,7 +607,8 @@ export const getOverallBreakdown = async (req, res) => {
             {
                 // Step 1: Match all transactions for the logged-in user
                 $match: {
-                    user: new mongoose.Types.ObjectId(userId)
+                    user: new mongoose.Types.ObjectId(userId),
+                    isDeleted: false
                 }
             },
             {

@@ -2,6 +2,8 @@ export const INCOME_CATEGORIES = [
     "Office",
     "Returns",
     "Investments",
+    "Freelance",
+    "Bonus",
     "Other Income"
 ];
 
