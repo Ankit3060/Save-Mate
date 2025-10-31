@@ -34,8 +34,10 @@ import {removeUnverifiedOTP} from './Services/removeUnverifiedOTP.js';
 import {removeUnverifiedTokens} from './Services/removeUnverifiedResetToken.js';
 import {updateTokenAttempt} from './Services/updateTokenAttempt.js';
 import {updateOtpAttempt} from './Services/updateOtpAttempt.js';
+import {deleteTransactionPermanently} from "./Services/deleteTransactionPermanently.js";
 
 removeUnverifiedOTP();
 removeUnverifiedTokens();
 updateTokenAttempt();
 updateOtpAttempt();
+deleteTransactionPermanently();
