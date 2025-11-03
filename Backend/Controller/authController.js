@@ -229,12 +229,12 @@ export const verifyOTP = async (req, res) => {
             })
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email, accountVerified: false });
         if (!user) {
             return res.status(400).json({
                 statusCode: 400,
                 success: false,
-                message: "User not found"
+                message: "User not found or already verified"
             })
         }
 
@@ -442,11 +442,7 @@ export const resetPassword = async (req, res) => {
         user.resetPasswordTokenExpire = undefined;
         await user.save();
 
-        return res.status(200).json({
-            statusCode: 200,
-            success: true,
-            message: "Password reset successfully"
-        });
+        sendToken(user, 200, "Password reset successfully", res);
 
     } catch (error) {
         return res.status(500).json({

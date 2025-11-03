@@ -1,22 +1,25 @@
 import { User } from "../Model/userModel.js";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 
 export const updateUserDetails = async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(400).json({
-        statusCode: 400,
-        success: false,
-        message: "User ID is required",
-      });
-    }
+    const {userId} = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({
+      statusCode: 400,
+      success: false,
+      message: "Invalid user ID format"
+    });
+  }
+
     const { name, phone } = req.body;
     if (!name || !phone) {
       return res.status(400).json({
         statusCode: 400,
       });
     }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -60,6 +63,7 @@ export const updateUserDetails = async (req, res) => {
       statusCode: 200,
       success: true,
       message: "User details updated successfully",
+      user
     });
   } catch (error) {
     return res.status(500).json({

@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
-import { Mail, KeyRound, ArrowLeft } from 'lucide-react'
+import React, { useState } from 'react';
+import { Mail, KeyRound, ArrowLeft } from 'lucide-react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function ForgetPassword() {
   const [email, setEmail] = useState('')
@@ -7,26 +10,34 @@ function ForgetPassword() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const handleSubmit = () => {
-    if (!email) {
-      setError('Email is required')
-      return
+  const navigatTo = useNavigate();
+
+  const handleSubmit = async () => {
+    if (!email) {   
+      setError("Email is required");
+      return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address')
-      return
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/auth/forget-password`,
+        { email },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      toast.success(response.data.message || "Reset link sent to your email");
+      setError("");
+      setEmail("");
+      setSuccess(true);
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      toast.error(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true)
-    setError('')
-
-    setTimeout(() => {
-      console.log('Reset link sent to:', email)
-      setSuccess(true)
-      setLoading(false)
-      setEmail('')
-    }, 1500)
   }
 
   const handleKeyPress = (e) => {
@@ -36,7 +47,7 @@ function ForgetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-rose-100 via-pink-50 to-orange-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-rose-100 via-pink-50 to-orange-100 flex items-center justify-center p-4 -mb-10">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-rose-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
@@ -64,9 +75,9 @@ function ForgetPassword() {
                 </div>
                 <button
                   onClick={() => setSuccess(false)}
-                  className="text-rose-600 hover:text-rose-700 font-medium transition-colors"
+                  className="text-rose-600 hover:text-rose-700 cursor-pointer font-medium transition-colors"
                 >
-                  Send another reset link
+                  Didn't receive the email? Send another reset link
                 </button>
               </div>
             ) : (
@@ -98,7 +109,7 @@ function ForgetPassword() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full bg-linear-to-r from-rose-600 to-pink-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-rose-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full cursor-pointer bg-linear-to-r from-rose-600 to-pink-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-rose-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {loading ? 'Sending...' : 'Send Reset Link'}
                 </button>
@@ -106,7 +117,10 @@ function ForgetPassword() {
             )}
 
             <div className="text-center pt-2">
-              <button className="flex items-center justify-center gap-2 text-gray-600 hover:text-gray-700 font-medium transition-colors mx-auto">
+              <button
+                onClick={()=>navigatTo("/login")}
+                className="flex cursor-pointer items-center justify-center gap-2 text-gray-600 hover:text-gray-700 font-medium transition-colors mx-auto"
+              >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Login
               </button>

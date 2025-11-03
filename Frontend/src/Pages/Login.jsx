@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, User, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useAuth } from "../Context/authContext";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -86,9 +86,9 @@ function Login() {
         <form onSubmit={handleLogin} className="space-y-5">
           {/* Email or Username */}
           <div>
-            <label className="block text-gray-700 text-sm mb-2">Email / Username</label>
+            <label className="block text-gray-700 text-sm mb-2">Email</label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 name="emailOrUsername"
@@ -163,7 +163,7 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold shadow-md hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300"
+            className="w-full bg-linear-to-r cursor-pointer from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold shadow-md hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300"
           >
             Login
           </button>

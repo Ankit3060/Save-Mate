@@ -1,7 +1,16 @@
 import React, { useState } from 'react'
 import { Lock, Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { useAuth } from '../Context/authContext'
 
 function ResetPassword() {
+  const { token } = useParams()
+  const navigate = useNavigate()
+  
+  const { setIsAuthenticated, setUser, setAccessToken } = useAuth();
+
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
@@ -10,31 +19,37 @@ function ResetPassword() {
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [showValidation, setShowValidation] = useState(true)
 
   const validatePassword = (value) => {
-    const hasUpperCase = /[A-Z]/.test(value)
-    const hasLowerCase = /[a-z]/.test(value)
-    const hasNumber = /\d/.test(value)
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value)
-    return hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
+    return {
+      length: value.length >= 8,
+      upper: /[A-Z]/.test(value),
+      lower: /[a-z]/.test(value),
+      number: /\d/.test(value),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
+    }
+  }
+
+  const getColor = (isValid, clicked) => {
+    if (isValid) return 'text-green-600'
+    if (clicked) return 'text-red-600'
+    return 'text-gray-700'
   }
 
   const handlePasswordChange = (value) => {
     setNewPassword(value)
-    if (value.length > 0 && !validatePassword(value)) {
-      setPasswordError(
-        'Password must contain at least one uppercase, lowercase, number, and special character.'
-      )
-    } else {
-      setPasswordError('')
-    }
+    setPasswordError('')
+    setShowValidation(true)
   }
 
-  const handleSubmit = () => {
-    if (!validatePassword(newPassword)) {
-      setPasswordError(
-        'Password must contain at least one uppercase, lowercase, number, and special character.'
-      )
+  const handleSubmit = async () => {
+    const validation = validatePassword(newPassword)
+    const allValid = Object.values(validation).every(Boolean)
+    setShowValidation(true)
+
+    if (!allValid) {
+      setPasswordError('Password does not meet all requirements.')
       return
     }
 
@@ -47,23 +62,45 @@ function ResetPassword() {
     setPasswordError('')
     setConfirmPasswordError('')
 
-    setTimeout(() => {
-      console.log('Password reset:', { newPassword, confirmNewPassword })
-      setSuccess(true)
-      setLoading(false)
-      setNewPassword('')
-      setConfirmNewPassword('')
-    }, 1500)
-  }
+    try {
+      const payload = {
+        password:newPassword,
+        confirmPassword:confirmNewPassword,
+      }
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSubmit()
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/auth/reset-password/${token}`,
+        payload,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        }
+      )
+
+      toast.success(response.data.message || 'Password reset successful')
+      setSuccess(true);
+      setUser(response.data.user);
+      setIsAuthenticated(true);
+      setAccessToken(response.data.accessToken);
+      setNewPassword('');
+      setConfirmNewPassword('');
+      navigate('/');
+    } catch (err) {
+      console.error('Reset password error:', err)
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
     }
   }
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSubmit()
+  }
+
+  const validation = validatePassword(newPassword)
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-amber-100 via-orange-50 to-yellow-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-amber-100 via-orange-50 to-yellow-100 flex items-center justify-center p-4 -mb-10">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
@@ -89,7 +126,10 @@ function ResetPassword() {
                   <p className="text-green-700 font-medium">Password reset successful!</p>
                   <p className="text-sm text-green-600 mt-2">You can now login with your new password</p>
                 </div>
-                <button className="text-amber-600 hover:text-amber-700 font-medium transition-colors">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
+                >
                   Go to Login
                 </button>
               </div>
@@ -121,11 +161,6 @@ function ResetPassword() {
                       {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {passwordError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-2">
-                      <p className="text-xs text-red-600">{passwordError}</p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -157,27 +192,41 @@ function ResetPassword() {
                       {showConfirmNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {confirmPasswordError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-2">
-                      <p className="text-xs text-red-600">{confirmPasswordError}</p>
-                    </div>
-                  )}
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                  <p className="text-xs text-blue-700">
-                    <strong>Password requirements:</strong>
-                    <br />• At least 8 characters long
-                    <br />• Contains uppercase and lowercase letters
-                    <br />• Contains at least one number
-                    <br />• Contains at least one special character
-                  </p>
-                </div>
+                {/* ✅ Dynamic Password Validation */}
+                {showValidation && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                    <p className={`text-xs ${getColor(validation.length, !!passwordError)}`}>
+                      • At least 8 characters long
+                    </p>
+                    <p className={`text-xs ${getColor(validation.upper && validation.lower, !!passwordError)}`}>
+                      • Contains uppercase and lowercase letters
+                    </p>
+                    <p className={`text-xs ${getColor(validation.number, !!passwordError)}`}>
+                      • Contains at least one number
+                    </p>
+                    <p className={`text-xs ${getColor(validation.special, !!passwordError)}`}>
+                      • Contains at least one special character
+                    </p>
+                  </div>
+                )}
+
+                {passwordError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-2">
+                    <p className="text-xs text-red-600">{passwordError}</p>
+                  </div>
+                )}
+                {confirmPasswordError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-2">
+                    <p className="text-xs text-red-600">{confirmPasswordError}</p>
+                  </div>
+                )}
 
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full bg-linear-to-r from-amber-600 to-orange-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-amber-700 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full bg-linear-to-r cursor-pointer from-amber-600 to-orange-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-amber-700 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {loading ? 'Resetting...' : 'Reset Password'}
                 </button>
@@ -185,7 +234,10 @@ function ResetPassword() {
             )}
 
             <div className="text-center pt-2">
-              <button className="flex items-center justify-center gap-2 text-gray-600 hover:text-gray-700 font-medium transition-colors mx-auto">
+              <button
+                onClick={() => navigate('/login')}
+                className="flex cursor-pointer items-center justify-center gap-2 text-gray-600 hover:text-gray-700 font-medium transition-colors mx-auto"
+              >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Login
               </button>

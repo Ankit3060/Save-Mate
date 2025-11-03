@@ -1,55 +1,89 @@
 import React, { useState } from 'react'
 import { Mail, ShieldCheck, RefreshCw } from 'lucide-react'
+import { useAuth } from '../Context/authContext';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 function VerifyOtp() {
+  const {isAuthenticated, setUser, setIsAuthenticated, setAccessToken, accessToken} = useAuth();
+
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
 
-  const handleSubmit = () => {
+  const navigateTo = useNavigate();
+
+  const handleSubmit = async () => {
     if (!email || !otp) {
       setError('Both email and OTP are required')
       return
     }
 
-    if (!/^\d{5}$/.test(otp)) {
-      setError('OTP must be exactly 5 digits')
+    if (!/^\d{6}$/.test(otp)) {
+      setError('OTP must be exactly 6 digits')
       return
     }
 
-    setLoading(true)
-    setTimeout(() => {
-      console.log('Verify OTP:', { email, otp })
-      setLoading(false)
-      setError('')
-      setEmail('')
-      setOtp('')
-    }, 1500)
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/auth/verify-otp`,
+        { email, otp },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      toast.success(response.data.message || "OTP verified successfully");
+      setUser(response.data.user);
+      setIsAuthenticated(true);
+      setAccessToken(response.data.accessToken);
+      navigateTo("/");
+      setError("");
+      setEmail("");
+      setOtp("");
+    } catch (err) {
+      console.error("Verify OTP error:", err);
+      toast.error(err.response?.data?.message || "Invalid OTP or Email");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async() => {
     if (!email) {
-      setError('Please enter your email first')
-      return
+      toast.error("Please enter your email first");
+      return;
     }
-
-    setResendLoading(true)
-    setTimeout(() => {
-      console.log('Resend OTP to:', email)
-      setResendLoading(false)
-      setError('')
-    }, 1500)
+    try {
+      setResendLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/auth/resend-otp`,
+        { email },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      toast.success(response.data.message || "OTP resent successfully");
+    } catch (err) {
+      console.error("Resend OTP error:", err);
+      toast.error(err.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setResendLoading(false);
+    }
   }
 
   const handleOtpChange = (e) => {
     const value = e.target.value
-    if (/^\d{0,5}$/.test(value)) {
+    if (/^\d{0,6}$/.test(value)) {
       setOtp(value)
       setError('')
     } else {
-      setError('OTP must be numbers only (5 digits)')
+      setError('OTP must be numbers only (6 digits)')
     }
   }
 
@@ -57,6 +91,10 @@ function VerifyOtp() {
     if (e.key === 'Enter') {
       handleSubmit()
     }
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
   }
 
   return (
@@ -103,8 +141,8 @@ function VerifyOtp() {
                   value={otp}
                   onChange={handleOtpChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter 5-digit OTP"
-                  maxLength="5"
+                  placeholder="Enter 6-digit OTP"
+                  maxLength="6"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-2xl tracking-widest font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                 />
               </div>
@@ -119,7 +157,7 @@ function VerifyOtp() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-linear-to-r from-violet-600 to-purple-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-violet-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-linear-to-r cursor-pointer from-violet-600 to-purple-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-violet-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? 'Verifying...' : 'Verify OTP'}
             </button>
@@ -128,7 +166,7 @@ function VerifyOtp() {
               <button
                 onClick={handleResendOtp}
                 disabled={resendLoading}
-                className="flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center cursor-pointer gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-4 h-4 ${resendLoading ? 'animate-spin' : ''}`} />
                 {resendLoading ? 'Resending...' : 'Resend OTP'}
@@ -138,7 +176,9 @@ function VerifyOtp() {
             <div className="text-center pt-2">
               <p className="text-gray-600">
                 Back to{' '}
-                <button className="text-violet-600 hover:text-violet-700 font-semibold transition-colors">
+                <button 
+                  onClick={() => navigateTo('/login')}
+                  className="text-violet-600 hover:text-violet-700 cursor-pointer font-semibold transition-colors">
                   Login
                 </button>
               </p>

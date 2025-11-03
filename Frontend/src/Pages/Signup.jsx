@@ -208,7 +208,7 @@ function Signup() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-linear-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-700 hover:to-teal-700 transform hover:scale-105 transition-all duration-300"
+              className="w-full bg-linear-to-r cursor-pointer from-emerald-600 to-teal-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-700 hover:to-teal-700 transform hover:scale-105 transition-all duration-300"
             >
               Sign Up
             </button>
@@ -219,7 +219,7 @@ function Signup() {
                 Already have an account?{' '}
                 <button
                   onClick={() => navigateTo('/login')}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                  className="text-emerald-600 hover:text-emerald-700 cursor-pointer font-semibold transition-colors"
                 >
                   Login now
                 </button>
