@@ -33,7 +33,7 @@ router.get("/get-transaction/:id", isAuthenticated, getTransactionById);
 // Delete Routes
 router.delete("/delete-transaction/:id", isAuthenticated, permanentDeleteTransaction);
 router.patch('/restore/:id', restoreTransactionFromTrash);
-router.delete('/delete-temp/:id', moveTransactionToTrash);
+router.patch('/delete-temp/:id',isAuthenticated , moveTransactionToTrash);
 router.get('/trash', getTrashedTransactions);
 
 

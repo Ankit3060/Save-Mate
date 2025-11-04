@@ -11,6 +11,9 @@ import ForgetPassword from './Pages/ForgetPassword';
 import ResetPassword from './Pages/ResetPassword';
 import Profile from './Pages/Profile';
 import UpdateProfile from './Pages/UpdateProfile';
+import AddTransaction from './Components/AddTransaction';
+import ViewTransaction from './Components/ViewTransaction';
+import ViewParticularTransaction from './Components/ViewParticulaTransaction';
 
 function App() {
 
@@ -27,6 +30,9 @@ function App() {
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/user/profile" element={<Profile />} />
             <Route path="user/update/profile" element={<UpdateProfile />} />
+            <Route path="/transaction/add" element={<AddTransaction />} />
+            <Route path='/transaction/view' element={<ViewTransaction />} />
+            <Route path='/transaction/view/:id' element={<ViewParticularTransaction />} />
           </Route>
         </Routes>
       </Router>
