@@ -32,9 +32,9 @@ router.get("/get-transaction/:id", isAuthenticated, getTransactionById);
 
 // Delete Routes
 router.delete("/delete-transaction/:id", isAuthenticated, permanentDeleteTransaction);
-router.patch('/restore/:id', restoreTransactionFromTrash);
+router.patch('/restore/:id',isAuthenticated, restoreTransactionFromTrash);
 router.patch('/delete-temp/:id',isAuthenticated , moveTransactionToTrash);
-router.get('/trash', getTrashedTransactions);
+router.get('/trash',isAuthenticated, getTrashedTransactions);
 
 
 // Stats Routes

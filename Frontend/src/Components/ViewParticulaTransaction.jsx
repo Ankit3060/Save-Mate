@@ -154,7 +154,7 @@ function ViewParticularTransaction() {
       <div className="max-w-4xl mx-auto">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium mb-6 transition duration-200"
+          className="flex items-center gap-2 cursor-pointer text-indigo-600 hover:text-indigo-700 font-medium mb-6 transition duration-200"
         >
           <ArrowLeft className="w-5 h-5" />
           Back to Transactions

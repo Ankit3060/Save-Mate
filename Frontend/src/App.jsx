@@ -14,6 +14,8 @@ import UpdateProfile from './Pages/UpdateProfile';
 import AddTransaction from './Components/AddTransaction';
 import ViewTransaction from './Components/ViewTransaction';
 import ViewParticularTransaction from './Components/ViewParticulaTransaction';
+import EditTransaction from './Components/EditTransaction';
+import Bin from './Components/Bin';
 
 function App() {
 
@@ -33,6 +35,8 @@ function App() {
             <Route path="/transaction/add" element={<AddTransaction />} />
             <Route path='/transaction/view' element={<ViewTransaction />} />
             <Route path='/transaction/view/:id' element={<ViewParticularTransaction />} />
+            <Route path='/transaction/edit/:id' element={<EditTransaction />} />
+            <Route path='/bin' element={<Bin />} />
           </Route>
         </Routes>
       </Router>
