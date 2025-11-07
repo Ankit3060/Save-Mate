@@ -16,6 +16,15 @@ import ViewTransaction from './Components/ViewTransaction';
 import ViewParticularTransaction from './Components/ViewParticulaTransaction';
 import EditTransaction from './Components/EditTransaction';
 import Bin from './Components/Bin';
+import Dashboard from './Components/Dashboard';
+import WeeklyReport from './Components/WeeklyReport';
+import MonthlyReport from './Components/MonthlyReport';
+import YearlyReport from './Components/YearlyReport';
+import ScrollToTop from './Layout/ScrollToTop'
+import About from './Pages/About';
+import ContactUs from './Pages/ContactUs';
+import Privacy from './Pages/Privacy';
+import Terms from './Pages/Terms';
 
 function App() {
 
@@ -23,7 +32,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<><Layout /> </>}>
+          <Route path="/" element={<><Layout /> <ScrollToTop /> </>}>
             <Route index element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -37,6 +46,14 @@ function App() {
             <Route path='/transaction/view/:id' element={<ViewParticularTransaction />} />
             <Route path='/transaction/edit/:id' element={<EditTransaction />} />
             <Route path='/bin' element={<Bin />} />
+            <Route path="/dashboard" element={ <Dashboard />} />
+            <Route path='/report/weekly' element={<WeeklyReport />} />
+            <Route path='/report/monthly' element={<MonthlyReport />} />
+            <Route path='/report/yearly' element={<YearlyReport />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/contact' element={<ContactUs />} />
+            <Route path='/privacy' element={<Privacy />} />
+            <Route path='/terms' element={<Terms />} />
           </Route>
         </Routes>
       </Router>

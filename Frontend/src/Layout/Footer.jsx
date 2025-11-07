@@ -46,7 +46,7 @@ function Footer() {
                 </li>
                 <li>
                   <NavLink
-                    to="/user/create/blog"
+                    to="/contact"
                     className="hover:text-indigo-400 transition"
                   >
                     Contact Us
@@ -60,7 +60,7 @@ function Footer() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <NavLink
-                    to="/help"
+                    to="/contact"
                     className="hover:text-indigo-400 transition"
                   >
                     Help Center

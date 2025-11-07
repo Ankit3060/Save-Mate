@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Trash2,
-  RotateCcw,
-  Loader2,
-  AlertCircle,
-  Calendar,
-  Hash,
-  Tag,
-  FileText,
-  AlertTriangle,
-} from "lucide-react";
+import {Trash2,RotateCcw,Loader2,AlertCircle,Calendar,Hash,Tag,FileText,AlertTriangle,ArrowLeft,} from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../Context/authContext";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Bin() {
   const { accessToken } = useAuth();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -138,13 +130,24 @@ function Bin() {
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
           <div className="bg-linear-to-r from-red-500 to-orange-600 p-6">
-            <div className="flex items-center gap-3">
-              <Trash2 className="w-8 h-8 text-white" />
-              <div>
-                <h1 className="text-3xl font-bold text-white">Trash Bin</h1>
-                <p className="text-red-100 mt-1">
-                  Deleted transactions • {transactions.length} item(s)
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate("/")}
+                  className="p-2 cursor-pointer rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors"
+                  aria-label="Back to Homepage"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <div className="flex items-center gap-3">
+                  <Trash2 className="w-8 h-8 text-white" />
+                  <div>
+                    <h1 className="text-3xl font-bold text-white">Trash Bin</h1>
+                    <p className="text-red-100 mt-1">
+                      Deleted transactions • {transactions.length} item(s)
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

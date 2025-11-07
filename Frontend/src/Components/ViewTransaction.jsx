@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import {Eye,Edit,Trash2,Download,ChevronLeft,ChevronRight,Loader2,AlertCircle,ArrowLeft,} from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../Context/authContext";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function ViewTransaction() {
   const { accessToken } = useAuth();
+  const navigate = useNavigate();
 
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,17 +18,20 @@ function ViewTransaction() {
   const [deleteLoading, setDeleteLoading] = useState(null);
 
   useEffect(() => {
-    fetchTransactions();
-  }, [currentPage]);
+    if (accessToken) {
+      fetchTransactions();
+    } else if (!loading) {
+      setLoading(false);
+      setError("Please log in to view transactions.");
+    }
+  }, [currentPage, accessToken]);
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       setError("");
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }api/v1/transaction/all?page=${currentPage}&limit=10`,
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/transaction/all?page=${currentPage}&limit=10`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -53,6 +49,7 @@ function ViewTransaction() {
       }
     } catch (err) {
       toast.error("Failed to load transactions. Please try again.");
+      setError("Failed to load transactions. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -87,11 +84,11 @@ function ViewTransaction() {
   };
 
   const handleView = (id) => {
-    window.location.href = `/transaction/view/${id}`;
+    navigate(`/transaction/view/${id}`);
   };
 
   const handleEdit = (id) => {
-    window.location.href = `/transaction/edit/${id}`;
+    navigate(`/transaction/edit/${id}`);
   };
 
   const downloadCSV = () => {
@@ -109,15 +106,15 @@ function ViewTransaction() {
       txn.type,
       txn.category,
       txn.amount,
-      txn.description,
+      `"${txn.description || ""}"`,
     ]);
 
     const csv = [
       headers.join(","),
-      ...csvData.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ...csvData.map((row) => row.join(",")),
     ].join("\n");
 
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -157,14 +154,24 @@ function ViewTransaction() {
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-6 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Transactions</h2>
-              <p className="text-gray-600 mt-1">Total {total} transactions</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 cursor-pointer rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+                aria-label="Back to Homepage"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Transactions</h2>
+                <p className="text-gray-600 mt-1">Total {total} transactions</p>
+              </div>
             </div>
+
             <button
               onClick={downloadCSV}
               disabled={transactions.length === 0}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex cursor-pointer items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-5 h-5" />
               Download CSV
@@ -206,10 +213,10 @@ function ViewTransaction() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {transactions.length === 0 ? (
+                {transactions.length === 0 && !error ? (
                   <tr>
                     <td
-                      colSpan="6"
+                      colSpan="7"
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       No transactions found
@@ -239,8 +246,8 @@ function ViewTransaction() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {txn.category}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {txn.description}
+                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title={txn.description}>
+                        {txn.description || "-"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                         ₹{txn.amount.toLocaleString("en-IN")}
@@ -282,10 +289,10 @@ function ViewTransaction() {
             </table>
           </div>
 
-          {transactions.length > 0 && (
+          {transactions.length > 0 && totalPages > 1 && ( 
             <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between flex-wrap gap-4">
               <div className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
+                Page {currentPage} of {totalPages} (Total: {total} transactions)
               </div>
               <div className="flex items-center gap-2">
                 <button

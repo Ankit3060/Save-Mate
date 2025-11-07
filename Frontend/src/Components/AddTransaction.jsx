@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {DollarSign, Calendar, Tag, FileText, Plus, Loader2,} from "lucide-react";
+import {DollarSign,Calendar,Tag,FileText,Plus,Loader2,ArrowLeft,} from "lucide-react";
 import { useAuth } from "../Context/authContext";
 import { toast } from "react-toastify";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function AddTransaction() {
   const { user, accessToken } = useAuth();
@@ -23,9 +23,10 @@ function AddTransaction() {
   const [message, setMessage] = useState({ text: "", type: "" });
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
+    if (accessToken) {
+      fetchCategories();
+    }
+  }, [accessToken]); 
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
@@ -47,7 +48,7 @@ function AddTransaction() {
         toast.error("Failed to load categories");
       }
     } catch (error) {
-      toast.error("Failed to load categories. Check backend connection.");
+      toast.error("Failed to load categories. Please check your connection.");
     } finally {
       setCategoriesLoading(false);
     }
@@ -94,7 +95,7 @@ function AddTransaction() {
       }
 
     } catch (error) {
-      toast.error("An error occurred while adding transaction.");
+      toast.error(error?.response?.data?.message || "An error occurred while adding transaction.");
     }finally {
       setLoading(false);
     }
@@ -107,11 +108,25 @@ function AddTransaction() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8 -mb-10">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        
+        {/* --- Header with Back Button --- */}
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="p-2 cursor-pointer rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+              aria-label="Back to Homepage"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h2 className="text-3xl font-bold text-gray-900">
               Add Transaction
             </h2>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="mb-8">
             <p className="text-gray-600">
               Keep track of your finances by adding a new transaction
             </p>
@@ -227,12 +242,13 @@ function AddTransaction() {
                 Amount
               </label>
               <input
-                type=""
+                type="number" // Changed to "number" for better input handling
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
                 placeholder="0.00"
                 step="0.01"
+                min="0.01" // Added min validation
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none duration-200"
               />
@@ -242,7 +258,7 @@ function AddTransaction() {
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <FileText className="w-4 h-4 mr-2 text-indigo-600" />
-                Description
+                Description (Optional)
               </label>
               <textarea
                 name="description"
@@ -250,7 +266,7 @@ function AddTransaction() {
                 onChange={handleChange}
                 placeholder="Add a note about this transaction..."
                 rows="4"
-                required
+                // --- REMOVED required ---
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition duration-200 resize-none"
               />
             </div>
@@ -258,7 +274,7 @@ function AddTransaction() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || categoriesLoading} // Also disable if categories are loading
               className="w-full bg-indigo-600 text-white cursor-pointer py-4 rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200 flex items-center justify-center shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
