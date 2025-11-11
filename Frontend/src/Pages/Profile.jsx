@@ -1,9 +1,11 @@
 import React from "react";
-import { Mail, Phone, Shield, Calendar, CheckCircle } from "lucide-react";
+import {Mail,Phone,Shield,Calendar,CheckCircle,ArrowLeft,} from "lucide-react";
 import { useAuth } from "../Context/authContext";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const userData = {
     avatar: user?.avatar?.url,
@@ -27,19 +29,23 @@ function Profile() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 py-8 px-4 -mb-10">
       <div className="max-w-4xl mx-auto">
-        {/* Card Container */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Banner with background image */}
           <div
             className="h-60 relative bg-cover bg-center"
             style={{
               backgroundImage: "url('/banner.png')",
             }}
           >
-            {/* Overlay for better contrast */}
+            <button
+              onClick={() => navigate('/')}
+              className="absolute top-6 cursor-pointer left-6 z-10 p-2 rounded-full bg-white/30 text-white hover:bg-white/50 transition-colors"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+
             <div className="absolute inset-0 bg-black/20"></div>
 
-            {/* Avatar positioned at bottom of banner */}
             <div className="absolute -bottom-16 left-8">
               <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white">
                 <img
@@ -51,24 +57,19 @@ function Profile() {
             </div>
           </div>
 
-          {/* Profile Content */}
           <div className="pt-20 px-8 pb-8">
-            {/* Name and Verification */}
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold text-gray-900">
                 {userData.name}
               </h1>
             </div>
 
-            {/* Role Badge */}
             <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
               <Shield className="w-4 h-4" />
               {userData.role}
             </div>
 
-            {/* Information Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {/* Email */}
               <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5 text-blue-600" />
@@ -83,7 +84,6 @@ function Profile() {
                 </div>
               </div>
 
-              {/* Phone */}
               <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                   <Phone className="w-5 h-5 text-green-600" />
@@ -98,7 +98,6 @@ function Profile() {
                 </div>
               </div>
 
-              {/* Member Since */}
               <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
                   <Calendar className="w-5 h-5 text-purple-600" />
@@ -113,7 +112,6 @@ function Profile() {
                 </div>
               </div>
 
-              {/* Account Status */}
               <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <CheckCircle className="w-5 h-5 text-emerald-600" />

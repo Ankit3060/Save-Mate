@@ -1,22 +1,31 @@
 import nodeMailer from "nodemailer";
 
-export const sendEmail = async({email, subject, message})=>{
+export const sendEmail = async ({ email, subject, message }) => {
+    console.log(process.env.SMTP_MAIL, process.env.SMTP_PASSWORD)
+
     const transporter = nodeMailer.createTransport({
         host: process.env.SMTP_HOST,
-        service: process.env.SMTP_SERVICE,
         port: process.env.SMTP_PORT,
-        auth:{
+        secure: false,
+        auth: {
             user: process.env.SMTP_MAIL,
             pass: process.env.SMTP_PASSWORD
         }
     });
 
+    transporter.verify((error, success) => {
+        if (error) console.error("SMTP connection failed:", error);
+        else console.log("SMTP connected successfully");
+    });
+
+
     const mailOptions = {
-        from: process.env.SMTP_MAIL,
+        from: `"SaveMate" <dtspecial330660@gmail.com>`,
         to: email,
         subject,
         html: message
     }
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", info.messageId);
 }

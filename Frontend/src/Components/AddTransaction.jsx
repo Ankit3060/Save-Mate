@@ -108,8 +108,6 @@ function AddTransaction() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8 -mb-10">
       <div className="max-w-2xl mx-auto">
-        
-        {/* --- Header with Back Button --- */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -145,7 +143,6 @@ function AddTransaction() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Date */}
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="w-4 h-4 mr-2 text-indigo-600" />
@@ -162,8 +159,6 @@ function AddTransaction() {
                 className="w-full px-4 py-3 cursor-pointer border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition duration-200"
               />
             </div>
-
-            {/* Type */}
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <Tag className="w-4 h-4 mr-2 text-indigo-600" />
@@ -207,7 +202,6 @@ function AddTransaction() {
               </div>
             </div>
 
-            {/* Category */}
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <Tag className="w-4 h-4 mr-2 text-indigo-600" />
@@ -235,26 +229,24 @@ function AddTransaction() {
               )}
             </div>
 
-            {/* Amount */}
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <DollarSign className="w-4 h-4 mr-2 text-indigo-600" />
                 Amount
               </label>
               <input
-                type="number" // Changed to "number" for better input handling
+                type="number"
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
                 placeholder="0.00"
                 step="0.01"
-                min="0.01" // Added min validation
+                min="0.01"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none duration-200"
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <FileText className="w-4 h-4 mr-2 text-indigo-600" />
@@ -266,15 +258,12 @@ function AddTransaction() {
                 onChange={handleChange}
                 placeholder="Add a note about this transaction..."
                 rows="4"
-                // --- REMOVED required ---
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition duration-200 resize-none"
               />
             </div>
-
-            {/* Submit */}
             <button
               type="submit"
-              disabled={loading || categoriesLoading} // Also disable if categories are loading
+              disabled={loading || categoriesLoading}
               className="w-full bg-indigo-600 text-white cursor-pointer py-4 rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200 flex items-center justify-center shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (

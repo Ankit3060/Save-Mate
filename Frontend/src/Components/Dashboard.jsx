@@ -106,7 +106,7 @@ const useDashboardStats = (year, month, accessToken) => {
     return () => {
       controller.abort();
     };
-  }, [year, month, accessToken]); // Re-run effect when dependencies change
+  }, [year, month, accessToken]);
 
   return { stats, loading, error };
 };
@@ -230,7 +230,6 @@ function Dashboard() {
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 md:p-8 font-inter">
-      {/* ToastContainer for notifications */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -247,7 +246,6 @@ function Dashboard() {
         
         <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
-            {/* Using <a> tag for simplicity as requested. Use Link from react-router-dom if available */}
             <a 
               onClick={()=>navigateTo('/')}
               className="p-2 cursor-pointer rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
@@ -276,7 +274,6 @@ function Dashboard() {
           </div>
         </header>
 
-        {/* --- Content --- */}
         {loading && (
           <div className="flex flex-col items-center justify-center h-64">
             <Loader2 className="w-12 h-12 animate-spin text-blue-500" />

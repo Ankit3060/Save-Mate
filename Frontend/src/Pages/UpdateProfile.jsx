@@ -1,21 +1,13 @@
 import React, { useState } from "react";
-import {
-  Mail,
-  Phone,
-  Shield,
-  Calendar,
-  CheckCircle,
-  Lock,
-  Eye,
-  EyeOff,
-  Save,
-} from "lucide-react";
+import {CheckCircle,Lock,Eye,EyeOff,Save,ArrowLeft,} from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../Context/authContext";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function UpdateProfile() {
   const { accessToken, user, setUser } = useAuth();
+  const navigate = useNavigate();
   const id = user?._id;
 
   const [userData, setUserData] = useState({
@@ -209,15 +201,21 @@ function UpdateProfile() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 py-8 px-4 -mb-10">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Profile Information Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Banner */}
           <div
             className="h-60 relative bg-cover bg-center"
             style={{
               backgroundImage: "url('/banner.png')",
             }}
           >
+            <button
+              onClick={() => navigate("/")}
+              className="absolute top-6 cursor-pointer left-6 z-10 p-2 rounded-full bg-white/30 text-white hover:bg-white/50 transition-colors"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+
             <div className="absolute inset-0 bg-black opacity-10"></div>
             <div className="absolute -bottom-16 left-8">
               <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white">
@@ -230,7 +228,6 @@ function UpdateProfile() {
             </div>
           </div>
 
-          {/* Profile Content */}
           <div className="pt-20 px-8 pb-8">
             <div className="flex items-center gap-3 mb-6">
               <h1 className="text-3xl font-bold text-gray-900">
@@ -242,9 +239,7 @@ function UpdateProfile() {
             </div>
 
             <div className="space-y-6">
-              {/* Editable Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Name - Editable */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name
@@ -258,7 +253,6 @@ function UpdateProfile() {
                   />
                 </div>
 
-                {/* Phone - Editable */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
@@ -272,7 +266,6 @@ function UpdateProfile() {
                   />
                 </div>
 
-                {/* Email - Disabled */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
@@ -285,7 +278,6 @@ function UpdateProfile() {
                   />
                 </div>
 
-                {/* Role - Disabled */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Role
@@ -298,7 +290,6 @@ function UpdateProfile() {
                   />
                 </div>
 
-                {/* Member Since - Disabled */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Member Since
@@ -311,7 +302,6 @@ function UpdateProfile() {
                   />
                 </div>
 
-                {/* Account Status - Disabled */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Account Status
@@ -339,7 +329,6 @@ function UpdateProfile() {
           </div>
         </div>
 
-        {/* Update Password Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <Lock className="w-7 h-7 text-indigo-600" />
@@ -349,7 +338,6 @@ function UpdateProfile() {
           </div>
 
           <div className="space-y-6">
-            {/* Old Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Current Password
@@ -385,7 +373,6 @@ function UpdateProfile() {
               )}
             </div>
 
-            {/* New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 New Password
@@ -416,7 +403,6 @@ function UpdateProfile() {
               </div>
             </div>
 
-            {/* Password Criteria */}
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <p className="text-sm font-medium text-gray-700 mb-3">
                 Password Requirements:
@@ -479,7 +465,6 @@ function UpdateProfile() {
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm New Password

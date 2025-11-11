@@ -127,7 +127,6 @@ function Bin() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8 -mb-10">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
           <div className="bg-linear-to-r from-red-500 to-orange-600 p-6">
             <div className="flex items-center justify-between">
@@ -153,7 +152,6 @@ function Bin() {
           </div>
         </div>
 
-        {/* Empty State */}
         {transactions.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
             <Trash2 className="w-20 h-20 text-gray-300 mx-auto mb-4" />
@@ -166,7 +164,6 @@ function Bin() {
           </div>
         ) : (
           <>
-            {/* Warning Message */}
             <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
               <div className="flex items-start">
                 <AlertTriangle className="w-5 h-5 text-yellow-400 mt-0.5 mr-3" />
@@ -178,8 +175,6 @@ function Bin() {
                 </div>
               </div>
             </div>
-
-            {/* Table */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -296,7 +291,6 @@ function Bin() {
               </div>
             </div>
 
-            {/* Footer Info */}
             <div className="mt-6 bg-white rounded-lg shadow p-4">
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <div className="flex items-center gap-2">

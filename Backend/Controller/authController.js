@@ -78,7 +78,7 @@ export const registerUserLocal = async (req, res) => {
 
         await user.save();
 
-        sendVerificationCode(verificationCode, email, res);
+        sendVerificationCode(verificationCode, email);
         return res.status(200).json({
             statusCode: 200,
             success: true,
