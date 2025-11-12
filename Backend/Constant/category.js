@@ -4,6 +4,10 @@ export const INCOME_CATEGORIES = [
     "Investments",
     "Freelance",
     "Bonus",
+    "Interest",
+    "Refunds & Returns",
+    "Gifts / Donations Received",
+    "Trading Profits",
     "Other Income"
 ];
 
@@ -16,5 +20,12 @@ export const EXPENSE_CATEGORIES = [
     "Credit Card Bill",
     "Travel",
     "Shopping",
+    "Investments",
+    "Gifts / Donations",
+    "Home Maintenance",
+    "Medical / Healthcare",
+    "Subscriptions",
+    "Education",
+    "Insurance",
     "Other Expense"
 ];
