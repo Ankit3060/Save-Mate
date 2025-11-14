@@ -1,10 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Banknote, ChevronDown, Calendar, Loader2, AlertCircle } from 'lucide-react';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Banknote,
+  ChevronDown,
+  Calendar,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { useAuth } from '../Context/authContext';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../Context/themeContext';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 // --- Constants ---
 
@@ -27,7 +40,17 @@ const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 const INCOME_COLORS = ['#22c55e', '#86efac', '#16a34a', '#15803d', '#14532d', '#dcfce7'];
-const EXPENSE_COLORS = ['#ef4444', '#fca5a5', '#dc2626', '#b91c1c', '#7f1d1d', '#fee2e2', '#f87171', '#991b1b', '#fecaca'];
+const EXPENSE_COLORS = [
+  '#ef4444',
+  '#fca5a5',
+  '#dc2626',
+  '#b91c1c',
+  '#7f1d1d',
+  '#fee2e2',
+  '#f87171',
+  '#991b1b',
+  '#fecaca',
+];
 
 // --- Helper Functions ---
 
@@ -60,7 +83,7 @@ const useDashboardStats = (year, month, accessToken) => {
   useEffect(() => {
     if (!accessToken) {
       setLoading(false);
-      setError("Please log in to view the dashboard.");
+      setError('Please log in to view the dashboard.');
       return;
     }
 
@@ -114,72 +137,115 @@ const useDashboardStats = (year, month, accessToken) => {
 // --- Sub-Components ---
 
 const SummaryCard = ({ title, value, icon, color }) => {
+  const { theme } = useTheme();
+  const softDark = theme === 'dark';
+
+  const containerClass = softDark
+    ? 'bg-gray-700 border border-gray-600 text-gray-100'
+    : 'bg-white border border-gray-100 text-gray-800';
+
+  const titleClass = softDark ? 'text-sm font-medium text-gray-300' : 'text-sm font-medium text-gray-500';
+  const valueClass = softDark ? 'text-3xl font-bold text-gray-100 mt-2' : 'text-3xl font-bold text-gray-800 mt-2';
+
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className={`rounded-2xl p-6 shadow-sm ${containerClass}`}>
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-500">{title}</span>
+        <span className={titleClass}>{title}</span>
         <div className={`p-2 rounded-full ${color}`}>
           {icon}
         </div>
       </div>
-      <p className="text-3xl font-bold text-gray-800 mt-2">{formatCurrency(value)}</p>
+      <p className={valueClass}>{formatCurrency(value)}</p>
     </div>
   );
 };
 
-const FilterSelect = ({ value, onChange, options, icon, id }) => (
-  <div className="relative">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-      {icon}
-    </div>
-    <select
-      id={id}
-      value={value}
-      onChange={onChange}
-      className="appearance-none w-full bg-white border border-gray-300 rounded-lg py-2.5 pl-10 pr-10 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-      <ChevronDown size={18} />
-    </div>
-  </div>
-);
-
-const BreakdownChart = ({ title, data, colors }) => {
-  const chartData = useMemo(() => data.filter(item => item.totalAmount > 0), [data]);
+const FilterSelect = ({ value, onChange, options, icon, id }) => {
+  const { theme } = useTheme();
+  const softDark = theme === 'dark';
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-full">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
+    <div className="relative w-40">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span className={softDark ? 'text-gray-300' : 'text-gray-400'}>{icon}</span>
+      </div>
+      <select
+        id={id}
+        value={value}
+        onChange={onChange}
+        className={`appearance-none w-full rounded-lg py-2.5 pl-10 pr-10 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${softDark ? 'bg-gray-700 border border-gray-600 text-gray-100' : 'bg-white border border-gray-300 text-gray-700'}`}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+        <ChevronDown size={18} className={softDark ? 'text-gray-300' : 'text-gray-400'} />
+      </div>
+    </div>
+  );
+};
+
+// --- UPDATED BreakdownChart Component ---
+const BreakdownChart = ({ title, data, colors }) => {
+  const { theme } = useTheme();
+  const softDark = theme === 'dark';
+
+  const chartData = useMemo(() => (Array.isArray(data) ? data.filter((item) => item.totalAmount > 0) : []), [data]);
+
+  // Prepare data for Chart.js
+  const chartJsData = {
+    labels: chartData.map((item) => item.category),
+    datasets: [
+      {
+        label: title,
+        data: chartData.map((item) => item.totalAmount),
+        backgroundColor: colors,
+        borderColor: softDark ? '#2d2d2d' : '#ffffff',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // Configure Chart.js options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: softDark ? '#e5e7eb' : '#374151', // legend label color
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ${formatCurrency(value)}`;
+          },
+        },
+      },
+    },
+  };
+
+  const containerClass = softDark
+    ? 'rounded-2xl p-6 shadow-sm border h-full bg-gray-700 border-gray-600 text-gray-100'
+    : 'rounded-2xl p-6 shadow-sm border h-full bg-white border-gray-100 text-gray-800';
+
+  return (
+    <div className={containerClass}>
+      <h3 className="text-xl font-semibold mb-4">{title}</h3>
       {chartData.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="totalAmount"
-                  nameKey="category"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value)} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="relative h-64 md:h-70 w-full">
+            <Pie data={chartJsData} options={chartOptions} />
           </div>
-          
+
           <div className="space-y-3 overflow-y-auto max-h-64 pr-2">
             {chartData.map((item, index) => (
               <div key={item.category} className="flex items-center justify-between">
@@ -188,9 +254,11 @@ const BreakdownChart = ({ title, data, colors }) => {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: colors[index % colors.length] }}
                   />
-                  <span className="text-sm text-gray-600">{item.category}</span>
+                  <span className={softDark ? 'text-sm text-gray-200' : 'text-sm text-gray-600'}>
+                    {item.category}
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-gray-800">
+                <span className={softDark ? 'text-sm font-medium text-gray-100' : 'text-sm font-medium text-gray-800'}>
                   {formatCurrency(item.totalAmount)}
                 </span>
               </div>
@@ -199,8 +267,10 @@ const BreakdownChart = ({ title, data, colors }) => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-64">
-          <Banknote size={48} className="text-gray-300 mb-3" />
-          <p className="text-gray-500">No {title.toLowerCase()} recorded for this period.</p>
+          <Banknote size={48} className={softDark ? 'text-gray-400 mb-3' : 'text-gray-300 mb-3'} />
+          <p className={softDark ? 'text-gray-300' : 'text-gray-500'}>
+            No {title.toLowerCase()} recorded for this period.
+          </p>
         </div>
       )}
     </div>
@@ -214,6 +284,9 @@ function Dashboard() {
   const [year, setYear] = useState(new Date().getFullYear());
   const { accessToken } = useAuth();
   const navigateTo = useNavigate();
+  const { theme } = useTheme();
+
+  const softDark = theme === 'dark';
 
   // Pass accessToken to the custom hook
   const { stats, loading, error } = useDashboardStats(year, month, accessToken);
@@ -228,8 +301,11 @@ function Dashboard() {
     expenseBreakdown: [],
   };
 
+  const pageBgClass = softDark ? 'bg-gray-800 text-gray-100' : 'bg-gray-50 text-gray-900';
+  const headerTextClass = softDark ? 'text-3xl font-bold text-gray-100' : 'text-3xl font-bold text-gray-900';
+
   return (
-    <div className="bg-gray-50 min-h-screen p-4 md:p-8 font-inter">
+    <div className={`${pageBgClass} min-h-screen p-4 md:p-8 font-inter -mb-10`}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -240,20 +316,20 @@ function Dashboard() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme={softDark ? 'dark' : 'light'}
       />
       <div className="max-w-7xl mx-auto">
-        
         <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <a 
-              onClick={()=>navigateTo('/')}
-              className="p-2 cursor-pointer rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+            <button
+              onClick={() => navigateTo('/')}
+              className={`p-2 cursor-pointer rounded-lg transition-colors
+                ${softDark ? 'bg-gray-700 border border-gray-600 text-gray-100 hover:bg-gray-600' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'}`}
               aria-label="Back to Homepage"
             >
               <ArrowLeft size={20} />
-            </a>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            </button>
+            <h1 className={headerTextClass}>Dashboard</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -268,7 +344,7 @@ function Dashboard() {
               id="year-filter"
               value={year}
               onChange={(e) => setYear(parseInt(e.target.value))}
-              options={YEARS.map(y => ({ value: y, label: y.toString() }))}
+              options={YEARS.map((y) => ({ value: y, label: y.toString() }))}
               icon={<Calendar size={18} />}
             />
           </div>
@@ -276,16 +352,20 @@ function Dashboard() {
 
         {loading && (
           <div className="flex flex-col items-center justify-center h-64">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
-            <p className="ml-3 text-gray-600 mt-3">Loading Dashboard...</p>
+            <Loader2 className={`w-12 h-12 animate-spin ${softDark ? 'text-gray-200' : 'text-blue-500'}`} />
+            <p className={`${softDark ? 'text-gray-300' : 'text-gray-600'} ml-3 mt-3`}>Loading Dashboard...</p>
           </div>
         )}
 
         {error && !loading && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg flex items-start" role="alert">
-            <AlertCircle className="w-6 h-6 mr-3 text-red-500" />
+          <div
+            className={`${softDark ? 'bg-red-900 border-l-4 border-red-700 text-red-100' : 'bg-red-100 border-l-4 border-red-500 text-red-700'
+              } p-6 rounded-lg flex items-start`}
+            role="alert"
+          >
+            <AlertCircle className={`${softDark ? 'w-6 h-6 mr-3 text-red-400' : 'w-6 h-6 mr-3 text-red-500'}`} />
             <div>
-              <strong className="font-bold text-lg">Error</strong>
+              <strong className={`${softDark ? 'font-bold text-lg text-red-200' : 'font-bold text-lg'}`}>Error</strong>
               <p className="mt-1">{error}</p>
             </div>
           </div>
@@ -298,33 +378,25 @@ function Dashboard() {
                 title="Total Income"
                 value={summary.totalIncome}
                 icon={<ArrowUpRight size={20} className="text-green-800" />}
-                color="bg-green-100"
+                color={softDark ? 'bg-green-800' : 'bg-green-100'}
               />
               <SummaryCard
                 title="Total Expense"
                 value={summary.totalExpense}
                 icon={<ArrowDownLeft size={20} className="text-red-800" />}
-                color="bg-red-100"
+                color={softDark ? 'bg-red-800' : 'bg-red-100'}
               />
               <SummaryCard
                 title="Balance"
                 value={summary.balance}
                 icon={<Banknote size={20} className="text-blue-800" />}
-                color="bg-blue-100"
+                color={softDark ? 'bg-blue-800' : 'bg-blue-100'}
               />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BreakdownChart
-                title="Income Breakdown"
-                data={incomeBreakdown}
-                colors={INCOME_COLORS}
-              />
-              <BreakdownChart
-                title="Expense Breakdown"
-                data={expenseBreakdown}
-                colors={EXPENSE_COLORS}
-              />
+              <BreakdownChart title="Income Breakdown" data={incomeBreakdown} colors={INCOME_COLORS} />
+              <BreakdownChart title="Expense Breakdown" data={expenseBreakdown} colors={EXPENSE_COLORS} />
             </div>
           </div>
         )}

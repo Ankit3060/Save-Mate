@@ -6,6 +6,7 @@ import { FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
 import logo from "../assets/logo.png";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTheme } from "../Context/themeContext";
 
 function Header() {
   const {
@@ -17,9 +18,10 @@ function Header() {
     accessToken,
   } = useAuth();
 
+  const { theme, toggleTheme } = useTheme();
+
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const navigate = useNavigate();
   const avatarRef = useRef(null);
 
@@ -58,11 +60,6 @@ function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Theme toggler
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
-  }, [isDarkMode]);
 
   return (
     <header className="sticky top-0 left-0 w-full bg-linear-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white px-8 sm:px-12 lg:px-20 py-3 shadow-md z-50">
@@ -116,10 +113,10 @@ function Header() {
         <div className="flex items-center gap-3 relative" ref={avatarRef}>
           {/* Theme toggler */}
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-gray-700 transition"
           >
-            {isDarkMode ? (
+            {theme === "dark" ? (
               <FiSun className="text-yellow-400 text-xl" />
             ) : (
               <FiMoon className="text-gray-300 text-xl" />
