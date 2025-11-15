@@ -1,21 +1,36 @@
-import React, { useState } from 'react';
-import { toast } from 'react-toastify'; // Using react-toastify for notifications
-import { MapPin, Phone, Mail, ArrowLeft, Loader2, Send } from 'lucide-react';
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaGithub } from 'react-icons/fa';
-import { FaXTwitter } from 'react-icons/fa6';
-import emailjs from 'emailjs-com';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { toast } from "react-toastify";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  ArrowLeft,
+  Loader2,
+  Send,
+} from "lucide-react";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaGithub,
+} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import emailjs from "emailjs-com";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../Context/themeContext";
 
 function ContactUs() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const softDark = theme === "dark";
+
   const [loading, setLoading] = useState(false);
 
-  // State for form fields
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    query: '',
+    name: "",
+    email: "",
+    phone: "",
+    query: "",
   });
 
   const handleChange = (e) => {
@@ -27,17 +42,15 @@ function ContactUs() {
     e.preventDefault();
     setLoading(true);
 
-    // --- Validation ---
     if (!formData.name || !formData.email || !formData.query) {
-      toast.error('Please fill in your name, email, and message.');
+      toast.error("Please fill in your name, email, and message.");
       setLoading(false);
       return;
     }
 
-    // --- Prepare template data for EmailJS ---
     const templateData = {
       from_name: formData.name,
-      to_name: 'Ankit Kumar', // This can be hardcoded as it's to you
+      to_name: "Ankit Kumar",
       phone: formData.phone,
       message: formData.query,
       from_email: formData.email,
@@ -47,66 +60,81 @@ function ContactUs() {
     const templateID = import.meta.env.VITE_TEMPLATE_ID;
     const userID = import.meta.env.VITE_USER_ID;
 
-    // --- Send Email ---
     emailjs.send(serviceID, templateID, templateData, userID).then(
-      (result) => {
-        // On Success: Show success toast and clear form
-        toast.success("Message sent successfully! We'll get back to you soon.");
+      () => {
+        toast.success("Message sent successfully!");
         setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          query: '',
+          name: "",
+          email: "",
+          phone: "",
+          query: "",
         });
         setLoading(false);
       },
-      (error) => {
-        // On Failure: Show error toast
-        toast.error('Something went wrong. Please try again later.');
-        console.error('EmailJS Error:', error.text);
+      () => {
+        toast.error("Something went wrong. Try again later.");
         setLoading(false);
       }
     );
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8 -mb-10 font-inter">
+    <div
+      className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 -mb-10 font-inter transition-all duration-300 ${
+        softDark
+          ? "bg-gray-900 text-gray-100"
+          : "bg-linear-to-br from-blue-50 to-indigo-100 text-gray-900"
+      }`}
+    >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="max-w-max mx-auto mb-6">
             <button
-              onClick={() => navigate('/')}
-              className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 hover:text-indigo-600 transition-colors"
-              aria-label="Back to Homepage"
+              onClick={() => navigate("/")}
+              className={`flex cursor-pointer items-center gap-2 text-sm transition-colors ${
+                softDark
+                  ? "text-gray-300 hover:text-indigo-400"
+                  : "text-gray-700 hover:text-indigo-600"
+              }`}
             >
               <ArrowLeft size={18} />
               Back to Home
             </button>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Contact Us
-          </h1>
-          <p className="text-lg max-w-2xl mx-auto leading-relaxed text-gray-600">
-            We'd love to hear from you! Whether you have a question, feedback, or
-            just want to say hello, feel free to reach out.
+
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+
+          <p
+            className={`text-lg max-w-2xl mx-auto leading-relaxed ${
+              softDark ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
+            We'd love to hear from you! Whether you have a question, feedback,
+            or just want to say hello, feel free to reach out.
           </p>
         </div>
 
-        {/* Main Content: Two-column layout */}
-        <div className="rounded-2xl shadow-xl overflow-hidden bg-white">
+        {/* Main Card */}
+        <div
+          className={`rounded-2xl shadow-xl overflow-hidden transition ${
+            softDark ? "bg-gray-800 border border-gray-700" : "bg-white"
+          }`}
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* Left Side: Company Information */}
+            {/* Left: Info Panel */}
             <div className="p-8 lg:p-12 bg-linear-to-br from-indigo-600 to-blue-700 text-white">
               <h2 className="text-3xl font-bold mb-6">Contact Information</h2>
+
               <p className="text-indigo-100 mb-8 leading-relaxed">
                 Our team is available to assist you. You can find us at our
                 office, give us a call, or drop us an email.
               </p>
 
+              {/* Info Items */}
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <MapPin className="w-8 h-8 mt-1 text-indigo-200" />
+                  <MapPin className="w-8 h-8 text-indigo-200 mt-1" />
                   <div>
                     <h3 className="font-semibold text-lg">Our Address</h3>
                     <p className="text-indigo-100">
@@ -114,15 +142,17 @@ function ContactUs() {
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-start gap-4">
-                  <Phone className="w-7 h-7 mt-1 text-indigo-200" />
+                  <Phone className="w-7 h-7 text-indigo-200 mt-1" />
                   <div>
                     <h3 className="font-semibold text-lg">Call Us</h3>
                     <p className="text-indigo-100">+91 93928 33614</p>
                   </div>
                 </div>
+
                 <div className="flex items-start gap-4">
-                  <Mail className="w-7 h-7 mt-1 text-indigo-200" />
+                  <Mail className="w-7 h-7 text-indigo-200 mt-1" />
                   <div>
                     <h3 className="font-semibold text-lg">Email Us</h3>
                     <p className="text-indigo-100">ankit330660@gmail.com</p>
@@ -130,154 +160,167 @@ function ContactUs() {
                 </div>
               </div>
 
-              {/* Social Media Links */}
-              <div className="mt-12 pt-8 border-t border-indigo-500">
+              {/* Social Icons */}
+              <div className="mt-12 pt-8 border-t border-indigo-400/50">
                 <h3 className="font-semibold text-lg mb-4">Follow Us</h3>
+
                 <div className="flex space-x-4">
-                  <a
-                    href="https://x.com/ankit330660"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"
-                  >
-                    <FaXTwitter className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="https://github.com/Ankit3060"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"
-                  >
-                    <FaGithub className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/in/ankit-kumar-511b31229/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"
-                  >
-                    <FaLinkedinIn className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="https://www.instagram.com/ankit_ak33/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"
-                  >
-                    <FaInstagram className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="https://www.facebook.com/share/1FZxBKzdun/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"
-                  >
-                    <FaFacebookF className="w-5 h-5" />
-                  </a>
+                  {[
+                    {
+                      icon: <FaXTwitter className="w-5 h-5" />,
+                      link: "https://x.com/ankit330660",
+                    },
+                    {
+                      icon: <FaGithub className="w-5 h-5" />,
+                      link: "https://github.com/Ankit3060",
+                    },
+                    {
+                      icon: <FaLinkedinIn className="w-5 h-5" />,
+                      link: "https://www.linkedin.com/in/ankit-kumar-511b31229/",
+                    },
+                    {
+                      icon: <FaInstagram className="w-5 h-5" />,
+                      link: "https://www.instagram.com/ankit_ak33/",
+                    },
+                    {
+                      icon: <FaFacebookF className="w-5 h-5" />,
+                      link: "https://www.facebook.com/share/1FZxBKzdun/",
+                    },
+                  ].map((item, idx) => (
+                    <a
+                      key={idx}
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition"
+                    >
+                      {item.icon}
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Right Side: Contact Form */}
+            {/* Right: Form */}
             <div className="p-8 lg:p-12">
-              <h2 className="text-3xl font-bold mb-6 text-gray-900">
+              <h2
+                className={`text-3xl font-bold mb-6 ${
+                  softDark ? "text-gray-100" : "text-gray-900"
+                }`}
+              >
                 Send Us a Message
               </h2>
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
+                {/* Full Name */}
                 <div>
                   <label
-                    htmlFor="name"
-                    className="block text-sm font-medium mb-2 text-gray-700"
+                    className={`block text-sm font-medium mb-2 ${
+                      softDark ? "text-gray-300" : "text-gray-700"
+                    }`}
                   >
                     Full Name
                   </label>
                   <input
                     type="text"
-                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-gray-50 placeholder-gray-500"
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition placeholder-gray-500 ${
+                      softDark
+                        ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-indigo-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-indigo-500"
+                    }`}
                     placeholder="John Doe"
-                    required
                   />
                 </div>
 
                 {/* Email */}
                 <div>
                   <label
-                    htmlFor="email"
-                    className="block text-sm font-medium mb-2 text-gray-700"
+                    className={`block text-sm font-medium mb-2 ${
+                      softDark ? "text-gray-300" : "text-gray-700"
+                    }`}
                   >
                     Email Address
                   </label>
                   <input
                     type="email"
-                    id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-gray-50 placeholder-gray-500"
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition placeholder-gray-500 ${
+                      softDark
+                        ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-indigo-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-indigo-500"
+                    }`}
                     placeholder="you@example.com"
-                    required
                   />
                 </div>
 
-                {/* Phone (Optional) */}
+                {/* Phone */}
                 <div>
                   <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium mb-2 text-gray-700"
+                    className={`block text-sm font-medium mb-2 ${
+                      softDark ? "text-gray-300" : "text-gray-700"
+                    }`}
                   >
                     Phone Number (Optional)
                   </label>
                   <input
                     type="tel"
-                    id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-gray-50 placeholder-gray-500"
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition placeholder-gray-500 ${
+                      softDark
+                        ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-indigo-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-indigo-500"
+                    }`}
                     placeholder="+91 12345 67890"
                   />
                 </div>
 
-                {/* Query/Message */}
+                {/* Message */}
                 <div>
                   <label
-                    htmlFor="query"
-                    className="block text-sm font-medium mb-2 text-gray-700"
+                    className={`block text-sm font-medium mb-2 ${
+                      softDark ? "text-gray-300" : "text-gray-700"
+                    }`}
                   >
                     Your Message
                   </label>
                   <textarea
-                    id="query"
                     name="query"
                     rows="5"
                     value={formData.query}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition resize-none bg-gray-50 placeholder-gray-500"
+                    className={`w-full px-4 py-3 resize-none rounded-lg border focus:outline-none focus:ring-2 transition placeholder-gray-500 ${
+                      softDark
+                        ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-indigo-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-indigo-500"
+                    }`}
                     placeholder="How can we help you today?"
-                    required
                   ></textarea>
                 </div>
 
-                {/* Submit Button */}
-                <div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full cursor-pointer bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 flex items-center justify-center disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Send className="w-5 h-5 mr-2" />
-                    )}
-                    Send Message
-                  </button>
-                </div>
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full cursor-pointer flex items-center justify-center gap-2 font-bold py-3 px-6 rounded-lg transition disabled:opacity-50 ${
+                    softDark
+                      ? "bg-indigo-700 hover:bg-indigo-800 text-white"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
+                  Send Message
+                </button>
               </form>
             </div>
           </div>

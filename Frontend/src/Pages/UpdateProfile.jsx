@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import {CheckCircle,Lock,Eye,EyeOff,Save,ArrowLeft,} from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../Context/authContext";
+import { useTheme } from "../Context/themeContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 function UpdateProfile() {
   const { accessToken, user, setUser } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
+  const softDark = theme === "dark";
   const id = user?._id;
 
   const [userData, setUserData] = useState({
@@ -193,15 +196,19 @@ function UpdateProfile() {
   };
 
   const getCriteriaColor = (met, hasError) => {
-    if (hasError) return "text-red-600";
-    if (passwords.newPassword.length === 0) return "text-gray-500";
-    return met ? "text-green-600" : "text-gray-500";
+    if (hasError) return softDark ? "text-red-400" : "text-red-600";
+    if (passwords.newPassword.length === 0) return softDark ? "text-gray-500" : "text-gray-500";
+    return met ? (softDark ? "text-green-400" : "text-green-600") : (softDark ? "text-gray-500" : "text-gray-500");
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 py-8 px-4 -mb-10">
+    <div className={`min-h-screen py-8 px-4 -mb-10 transition-all duration-300
+      ${softDark ? "bg-gray-800" : "bg-linear-to-br from-slate-50 to-slate-100"}`}
+    >
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className={`rounded-2xl shadow-xl overflow-hidden
+          ${softDark ? "bg-gray-900 border border-gray-700" : "bg-white"}`}
+        >
           <div
             className="h-60 relative bg-cover bg-center"
             style={{
@@ -230,18 +237,24 @@ function UpdateProfile() {
 
           <div className="pt-20 px-8 pb-8">
             <div className="flex items-center gap-3 mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className={`text-3xl font-bold
+                ${softDark ? "text-gray-100" : "text-gray-900"}`}
+              >
                 Update Profile
               </h1>
               {userData.accountVerified && (
-                <CheckCircle className="w-7 h-7 text-blue-500 fill-blue-100" />
+                <CheckCircle className={`w-7 h-7
+                  ${softDark ? "text-blue-400 fill-blue-900/30" : "text-blue-500 fill-blue-100"}`} 
+                />
               )}
             </div>
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className={`block text-sm font-medium mb-2
+                    ${softDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Full Name
                   </label>
                   <input
@@ -249,12 +262,18 @@ function UpdateProfile() {
                     name="name"
                     value={editableData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all
+                      ${softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-100" 
+                        : "border-gray-300 text-gray-900"
+                      }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className={`block text-sm font-medium mb-2
+                    ${softDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Phone Number
                   </label>
                   <input
@@ -262,48 +281,72 @@ function UpdateProfile() {
                     name="phone"
                     value={editableData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all
+                      ${softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-100" 
+                        : "border-gray-300 text-gray-900"
+                      }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className={`block text-sm font-medium mb-2
+                    ${softDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={userData.email}
                     disabled
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    className={`w-full px-4 py-3 rounded-lg border cursor-not-allowed
+                      ${softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-500" 
+                        : "border-gray-300 bg-gray-100 text-gray-500"
+                      }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className={`block text-sm font-medium mb-2
+                    ${softDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Role
                   </label>
                   <input
                     type="text"
                     value={userData.role}
                     disabled
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    className={`w-full px-4 py-3 rounded-lg border cursor-not-allowed
+                      ${softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-500" 
+                        : "border-gray-300 bg-gray-100 text-gray-500"
+                      }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className={`block text-sm font-medium mb-2
+                    ${softDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Member Since
                   </label>
                   <input
                     type="text"
                     value={formatDate(userData.createdAt)}
                     disabled
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    className={`w-full px-4 py-3 rounded-lg border cursor-not-allowed
+                      ${softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-500" 
+                        : "border-gray-300 bg-gray-100 text-gray-500"
+                      }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className={`block text-sm font-medium mb-2
+                    ${softDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Account Status
                   </label>
                   <input
@@ -312,7 +355,11 @@ function UpdateProfile() {
                       userData.accountVerified ? "Verified" : "Not Verified"
                     }
                     disabled
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    className={`w-full px-4 py-3 rounded-lg border cursor-not-allowed
+                      ${softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-500" 
+                        : "border-gray-300 bg-gray-100 text-gray-500"
+                      }`}
                   />
                 </div>
               </div>
@@ -320,7 +367,7 @@ function UpdateProfile() {
               <button
                 onClick={handleUpdateProfile}
                 disabled={updateLoading}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex cursor-pointer items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 <Save className="w-5 h-5" />
                 {updateLoading ? "Updating..." : "Update Profile"}
@@ -329,17 +376,25 @@ function UpdateProfile() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className={`rounded-2xl shadow-xl p-8
+          ${softDark ? "bg-gray-900 border border-gray-700" : "bg-white"}`}
+        >
           <div className="flex items-center gap-3 mb-6">
-            <Lock className="w-7 h-7 text-indigo-600" />
-            <h2 className="text-2xl font-bold text-gray-900">
+            <Lock className={`w-7 h-7
+              ${softDark ? "text-indigo-400" : "text-indigo-600"}`} 
+            />
+            <h2 className={`text-2xl font-bold
+              ${softDark ? "text-gray-100" : "text-gray-900"}`}
+            >
               Update Password
             </h2>
           </div>
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2
+                ${softDark ? "text-gray-300" : "text-gray-700"}`}
+              >
                 Current Password
               </label>
               <div className="relative">
@@ -348,16 +403,19 @@ function UpdateProfile() {
                   name="oldPassword"
                   value={passwords.oldPassword}
                   onChange={handlePasswordChange}
-                  className={`w-full px-4 py-3 pr-12 rounded-lg border ${
-                    passwordErrors.oldPassword
+                  className={`w-full px-4 py-3 pr-12 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all
+                    ${passwordErrors.oldPassword
                       ? "border-red-500"
-                      : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all`}
+                      : softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-100" 
+                        : "border-gray-300 text-gray-900"
+                    }`}
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility("old")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className={`absolute right-3 top-1/2 -translate-y-1/2
+                    ${softDark ? "text-gray-400 hover:text-gray-300" : "text-gray-500 hover:text-gray-700"}`}
                 >
                   {showPasswords.old ? (
                     <EyeOff className="w-5 h-5" />
@@ -367,14 +425,18 @@ function UpdateProfile() {
                 </button>
               </div>
               {passwordErrors.oldPassword && (
-                <p className="text-red-600 text-sm mt-1">
+                <p className={`text-sm mt-1
+                  ${softDark ? "text-red-400" : "text-red-600"}`}
+                >
                   {passwordErrors.oldPassword}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2
+                ${softDark ? "text-gray-300" : "text-gray-700"}`}
+              >
                 New Password
               </label>
               <div className="relative">
@@ -383,16 +445,19 @@ function UpdateProfile() {
                   name="newPassword"
                   value={passwords.newPassword}
                   onChange={handlePasswordChange}
-                  className={`w-full px-4 py-3 pr-12 rounded-lg border ${
-                    passwordErrors.newPassword
+                  className={`w-full px-4 py-3 pr-12 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all
+                    ${passwordErrors.newPassword
                       ? "border-red-500"
-                      : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all`}
+                      : softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-100" 
+                        : "border-gray-300 text-gray-900"
+                    }`}
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility("new")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className={`absolute right-3 top-1/2 -translate-y-1/2
+                    ${softDark ? "text-gray-400 hover:text-gray-300" : "text-gray-500 hover:text-gray-700"}`}
                 >
                   {showPasswords.new ? (
                     <EyeOff className="w-5 h-5" />
@@ -403,8 +468,15 @@ function UpdateProfile() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <p className="text-sm font-medium text-gray-700 mb-3">
+            <div className={`rounded-lg p-4 border
+              ${softDark 
+                ? "bg-gray-800 border-gray-600" 
+                : "bg-gray-50 border-gray-200"
+              }`}
+            >
+              <p className={`text-sm font-medium mb-3
+                ${softDark ? "text-gray-300" : "text-gray-700"}`}
+              >
                 Password Requirements:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -466,7 +538,9 @@ function UpdateProfile() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2
+                ${softDark ? "text-gray-300" : "text-gray-700"}`}
+              >
                 Confirm New Password
               </label>
               <div className="relative">
@@ -475,16 +549,19 @@ function UpdateProfile() {
                   name="confirmNewPassword"
                   value={passwords.confirmNewPassword}
                   onChange={handlePasswordChange}
-                  className={`w-full px-4 py-3 pr-12 rounded-lg border ${
-                    passwordErrors.confirmNewPassword
+                  className={`w-full px-4 py-3 pr-12 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all
+                    ${passwordErrors.confirmNewPassword
                       ? "border-red-500"
-                      : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all`}
+                      : softDark 
+                        ? "bg-gray-800 border-gray-600 text-gray-100" 
+                        : "border-gray-300 text-gray-900"
+                    }`}
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility("confirm")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className={`absolute right-3 top-1/2 -translate-y-1/2
+                    ${softDark ? "text-gray-400 hover:text-gray-300" : "text-gray-500 hover:text-gray-700"}`}
                 >
                   {showPasswords.confirm ? (
                     <EyeOff className="w-5 h-5" />
@@ -494,7 +571,9 @@ function UpdateProfile() {
                 </button>
               </div>
               {passwordErrors.confirmNewPassword && (
-                <p className="text-red-600 text-sm mt-1">
+                <p className={`text-sm mt-1
+                  ${softDark ? "text-red-400" : "text-red-600"}`}
+                >
                   {passwordErrors.confirmNewPassword}
                 </p>
               )}
@@ -503,7 +582,7 @@ function UpdateProfile() {
             <button
               onClick={handleUpdatePassword}
               disabled={passwordLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="flex cursor-pointer items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <Lock className="w-5 h-5" />
               {passwordLoading ? "Updating..." : "Update Password"}

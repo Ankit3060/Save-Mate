@@ -5,6 +5,7 @@ import { Bar } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import {ArrowLeft,Loader2,AlertCircle,TrendingUp,Inbox,Banknote,CalendarCheck2,ArrowUpRight,ArrowDownLeft,} from "lucide-react";
 import { useAuth } from "../Context/authContext";
+import { useTheme } from "../Context/themeContext";
 import { toast } from "react-toastify";
 
 ChartJS.register(CategoryScale,LinearScale,BarElement,Title,Tooltip,Legend);
@@ -29,15 +30,25 @@ const formatCurrency = (value) => {
 
 /**
  * A simple card for displaying key yearly stats
- * @param {{ title: string, value: string | number, icon: React.ReactNode, colorClass: string }} props
+ * @param {{ title: string, value: string | number, icon: React.ReactNode, colorClass: string, softDark: boolean }} props
  */
-const StatBox = ({ title, value, icon, colorClass }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+const StatBox = ({ title, value, icon, colorClass, softDark }) => (
+  <div className={`rounded-xl shadow-sm border p-5 transition-all duration-300
+    ${softDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-100"}`}
+  >
     <div className="flex items-center justify-between mb-2">
-      <span className="text-sm font-medium text-gray-500">{title}</span>
+      <span className={`text-sm font-medium
+        ${softDark ? "text-gray-400" : "text-gray-500"}`}
+      >
+        {title}
+      </span>
       <div className={`p-2 rounded-full ${colorClass}`}>{icon}</div>
     </div>
-    <p className="text-2xl font-bold text-gray-800">{value}</p>
+    <p className={`text-2xl font-bold
+      ${softDark ? "text-gray-100" : "text-gray-800"}`}
+    >
+      {value}
+    </p>
   </div>
 );
 
@@ -47,8 +58,9 @@ function YearlyReport() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { accessToken } = useAuth();
-
+  const { theme } = useTheme();
   const navigateTo = useNavigate();
+  const softDark = theme === "dark";
 
   useEffect(() => {
     if (!accessToken) {
@@ -138,7 +150,7 @@ function YearlyReport() {
     };
   }, [reportData]);
 
-  // Memoize chart options
+  // Memoize chart options with theme support
   const chartOptions = useMemo(
     () => ({
       responsive: true,
@@ -146,12 +158,15 @@ function YearlyReport() {
       plugins: {
         legend: {
           position: "top",
+          labels: {
+            color: softDark ? "#e5e7eb" : "#333333",
+          },
         },
         tooltip: {
-          backgroundColor: "#ffffff",
-          titleColor: "#333333",
-          bodyColor: "#333333",
-          borderColor: "#dddddd",
+          backgroundColor: softDark ? "#374151" : "#ffffff",
+          titleColor: softDark ? "#f9fafb" : "#333333",
+          bodyColor: softDark ? "#f9fafb" : "#333333",
+          borderColor: softDark ? "#4b5563" : "#dddddd",
           borderWidth: 1,
           interaction: {
             mode: "point",
@@ -174,39 +189,53 @@ function YearlyReport() {
         y: {
           ticks: {
             callback: (value) => formatCurrency(value),
+            color: softDark ? "#9ca3af" : "#6b7280",
           },
           grid: {
-            color: "#e0e0e0",
+            color: softDark ? "#374151" : "#e0e0e0",
             borderDash: [3, 3],
           },
         },
         x: {
+          ticks: {
+            color: softDark ? "#9ca3af" : "#6b7280",
+          },
           grid: {
             display: false,
           },
         },
       },
     }),
-    []
+    [softDark]
   );
 
   // --- End Chart.js ---
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 md:p-8 font-inter">
+    <div className={`min-h-screen -mb-10 p-4 md:p-8 font-inter transition-all duration-300
+      ${softDark ? "bg-gray-800" : "bg-gray-50"}`}
+    >
       <div className="max-w-7xl mx-auto">
         <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
             <a
               onClick={()=>navigateTo('/')}
-              className="p-2 cursor-pointer rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+              className={`p-2 cursor-pointer rounded-lg border transition-colors
+                ${softDark 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 hover:bg-gray-600" 
+                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
+                }`}
               aria-label="Back to Homepage"
             >
               <ArrowLeft size={20} />
             </a>
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-7 h-7 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">
+              <TrendingUp className={`w-7 h-7 
+                ${softDark ? "text-blue-400" : "text-blue-600"}`} 
+              />
+              <h1 className={`text-3xl font-bold
+                ${softDark ? "text-gray-100" : "text-gray-900"}`}
+              >
                 Overall Report
               </h1>
             </div>
@@ -216,17 +245,29 @@ function YearlyReport() {
         {/* --- Content --- */}
         {loading && (
           <div className="flex flex-col items-center justify-center h-96">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
-            <p className="ml-3 text-gray-600 mt-3">Loading Report...</p>
+            <Loader2 className={`w-12 h-12 animate-spin
+              ${softDark ? "text-blue-400" : "text-blue-500"}`} 
+            />
+            <p className={`ml-3 mt-3
+              ${softDark ? "text-gray-300" : "text-gray-600"}`}
+            >
+              Loading Report...
+            </p>
           </div>
         )}
 
         {error && !loading && (
           <div
-            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg flex items-start h-96"
+            className={`border-l-4 p-6 rounded-lg flex items-start h-96
+              ${softDark 
+                ? "bg-red-900/20 border-red-500 text-red-300" 
+                : "bg-red-100 border-red-500 text-red-700"
+              }`}
             role="alert"
           >
-            <AlertCircle className="w-6 h-6 mr-3 text-red-500" />
+            <AlertCircle className={`w-6 h-6 mr-3
+              ${softDark ? "text-red-400" : "text-red-500"}`} 
+            />
             <div>
               <strong className="font-bold text-lg">Error</strong>
               <p className="mt-1">{error}</p>
@@ -247,33 +288,44 @@ function YearlyReport() {
                       <CalendarCheck2 size={18} className="text-blue-800" />
                     }
                     colorClass="bg-blue-100"
+                    softDark={softDark}
                   />
                   <StatBox
                     title="Total Income"
                     value={formatCurrency(data.totalIncome)}
                     icon={<ArrowUpRight size={18} className="text-green-800" />}
                     colorClass="bg-green-100"
+                    softDark={softDark}
                   />
                   <StatBox
                     title="Total Expense"
                     value={formatCurrency(data.totalExpense)}
                     icon={<ArrowDownLeft size={18} className="text-red-800" />}
                     colorClass="bg-red-100"
+                    softDark={softDark}
                   />
                   <StatBox
                     title="Net Balance"
                     value={formatCurrency(data.netBalance)}
                     icon={<Banknote size={18} className="text-indigo-800" />}
                     colorClass="bg-indigo-100"
+                    softDark={softDark}
                   />
                 </React.Fragment>
               ))}
             </div>
 
             {/* --- Chart --- */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className={`rounded-2xl shadow-sm border p-6 transition-all duration-300
+              ${softDark 
+                ? "bg-gray-900 border-gray-700" 
+                : "bg-white border-gray-100"
+              }`}
+            >
               <div className="h-96 w-full">
-                <h3 className="text-xl font-semibold text-gray-800 mb-6">
+                <h3 className={`text-xl font-semibold mb-6
+                  ${softDark ? "text-gray-100" : "text-gray-800"}`}
+                >
                   Overall Income vs. Expense
                 </h3>
                 <Bar options={chartOptions} data={chartData} />
@@ -283,12 +335,21 @@ function YearlyReport() {
         )}
 
         {!loading && !error && reportData.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-96 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <Inbox size={48} className="text-gray-300 mb-3" />
-            <h3 className="text-xl font-semibold text-gray-700">
+          <div className={`flex flex-col items-center justify-center h-96 rounded-2xl shadow-sm border transition-all duration-300
+            ${softDark 
+              ? "bg-gray-900 border-gray-700" 
+              : "bg-white border-gray-100"
+            }`}
+          >
+            <Inbox size={48} className={softDark ? "text-gray-600" : "text-gray-300"} />
+            <h3 className={`text-xl font-semibold mt-3
+              ${softDark ? "text-gray-300" : "text-gray-700"}`}
+            >
               No Data Available
             </h3>
-            <p className="text-gray-500 mt-1">
+            <p className={`mt-1
+              ${softDark ? "text-gray-400" : "text-gray-500"}`}
+            >
               There is no report data available at this time.
             </p>
           </div>

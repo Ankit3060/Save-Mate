@@ -13,12 +13,15 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../Context/authContext";
+import { useTheme } from "../Context/themeContext";
 import { toast } from "react-toastify";
 
 function EditTransaction() {
   const { accessToken } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const { id } = useParams();
+  const softDark = theme === "dark";
 
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -152,10 +155,23 @@ function EditTransaction() {
 
   if (loading || !transaction) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div
+        className={`min-h-screen -mb-10 flex items-center justify-center transition-all duration-300
+          ${
+            softDark
+              ? "bg-gray-800"
+              : "bg-linear-to-br from-blue-50 to-indigo-100"
+          }
+        `}
+      >
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading transaction...</p>
+          <Loader2
+            className={`w-12 h-12 animate-spin mx-auto mb-4 
+              ${softDark ? "text-indigo-400" : "text-indigo-600"}`}
+          />
+          <p className={softDark ? "text-gray-300" : "text-gray-600"}>
+            Loading transaction...
+          </p>
         </div>
       </div>
     );
@@ -163,13 +179,32 @@ function EditTransaction() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+      <div
+        className={`min-h-screen flex items-center justify-center p-4 transition-all duration-300
+          ${
+            softDark
+              ? "bg-gray-800"
+              : "bg-linear-to-br from-blue-50 to-indigo-100"
+          }
+        `}
+      >
+        <div
+          className={`rounded-2xl shadow-xl p-8 max-w-md w-full
+            ${softDark ? "bg-gray-900 border border-gray-700" : "bg-white"}`}
+        >
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
+          <h2
+            className={`text-2xl font-bold text-center mb-2
+              ${softDark ? "text-gray-100" : "text-gray-900"}`}
+          >
             Error
           </h2>
-          <p className="text-gray-600 text-center mb-6">{error}</p>
+          <p
+            className={`text-center mb-6
+              ${softDark ? "text-gray-300" : "text-gray-600"}`}
+          >
+            {error}
+          </p>
           <button
             onClick={handleBack}
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200"
@@ -182,17 +217,34 @@ function EditTransaction() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8 -mb-10">
+    <div
+      className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 -mb-10 transition-all duration-300
+        ${
+          softDark
+            ? "bg-gray-800"
+            : "bg-linear-to-br from-blue-50 to-indigo-100"
+        }
+      `}
+    >
       <div className="max-w-4xl mx-auto">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 cursor-pointer text-indigo-600 hover:text-indigo-700 font-medium mb-6 transition duration-200"
+          className={`flex items-center gap-2 cursor-pointer font-medium mb-6 transition duration-200
+            ${
+              softDark
+                ? "text-indigo-400 hover:text-indigo-300"
+                : "text-indigo-600 hover:text-indigo-700"
+            }
+          `}
         >
           <ArrowLeft className="w-5 h-5" />
           Back to Transactions
         </button>
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div
+          className={`rounded-2xl shadow-xl overflow-hidden
+            ${softDark ? "bg-gray-900 border border-gray-700" : "bg-white"}`}
+        >
           <div className="bg-linear-to-r from-indigo-600 to-purple-600 p-6">
             <h2 className="text-3xl font-bold text-white mb-2">
               Edit Transaction
@@ -204,12 +256,23 @@ function EditTransaction() {
 
           <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Date */}
-            <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 shadow-sm">
+            <div
+              className={`rounded-xl p-6 border-2 shadow-sm
+                ${
+                  softDark
+                    ? "bg-gray-800 border-gray-600"
+                    : "bg-linear-to-br from-blue-50 to-blue-100 border-blue-200"
+                }
+              `}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-blue-500 rounded-lg">
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide
+                    ${softDark ? "text-gray-300" : "text-gray-600"}`}
+                >
                   Date
                 </span>
               </div>
@@ -220,17 +283,34 @@ function EditTransaction() {
                 onClick={(e) => e.target.showPicker && e.target.showPicker()}
                 value={transaction.date?.split("T")[0]}
                 onChange={handleChange}
-                className="w-full border cursor-pointer border-blue-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                className={`w-full border rounded-lg px-3 py-2 cursor-pointer focus:ring-2 focus:outline-none
+                  ${
+                    softDark
+                      ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-blue-500"
+                      : "border-blue-300 text-gray-900 focus:ring-blue-400"
+                  }
+                `}
               />
             </div>
 
             {/* Amount */}
-            <div className="bg-linear-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200 shadow-sm">
+            <div
+              className={`rounded-xl p-6 border-2 shadow-sm
+                ${
+                  softDark
+                    ? "bg-gray-800 border-gray-600"
+                    : "bg-linear-to-br from-green-50 to-green-100 border-green-200"
+                }
+              `}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-green-500 rounded-lg">
                   <DollarSign className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide
+                    ${softDark ? "text-gray-300" : "text-gray-600"}`}
+                >
                   Amount
                 </span>
               </div>
@@ -242,17 +322,34 @@ function EditTransaction() {
                 placeholder="Enter amount"
                 value={transaction.amount}
                 onChange={handleChange}
-                className="w-full border border-green-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-green-400 focus:outline-none"
+                className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:outline-none
+                  ${
+                    softDark
+                      ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-green-500"
+                      : "border-green-300 text-gray-900 focus:ring-green-400"
+                  }
+                `}
               />
             </div>
 
             {/* Transaction ID */}
-            <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-xl p-6 border-2 border-purple-200 shadow-sm">
+            <div
+              className={`rounded-xl p-6 border-2 shadow-sm
+                ${
+                  softDark
+                    ? "bg-gray-800 border-gray-600"
+                    : "bg-linear-to-br from-purple-50 to-purple-100 border-purple-200"
+                }
+              `}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-purple-500 rounded-lg">
                   <Hash className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide
+                    ${softDark ? "text-gray-300" : "text-gray-600"}`}
+                >
                   Transaction ID
                 </span>
               </div>
@@ -260,17 +357,34 @@ function EditTransaction() {
                 type="text"
                 value={transaction._id}
                 disabled
-                className="w-full bg-gray-100 border border-purple-300 rounded-lg px-3 py-2 text-gray-600 cursor-not-allowed"
+                className={`w-full border rounded-lg px-3 py-2 cursor-not-allowed
+                  ${
+                    softDark
+                      ? "bg-gray-700 border-gray-600 text-gray-400"
+                      : "bg-gray-100 border-purple-300 text-gray-600"
+                  }
+                `}
               />
             </div>
 
             {/* Type */}
-            <div className="bg-linear-to-br from-red-50 to-red-100 rounded-xl p-6 border-2 border-red-200 shadow-sm">
+            <div
+              className={`rounded-xl p-6 border-2 shadow-sm
+                ${
+                  softDark
+                    ? "bg-gray-800 border-gray-600"
+                    : "bg-linear-to-br from-red-50 to-red-100 border-red-200"
+                }
+              `}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-red-500 rounded-lg">
                   <Tag className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium uppercase tracking-wide">
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide
+                    ${softDark ? "text-gray-300" : "text-gray-600"}`}
+                >
                   Type
                 </span>
               </div>
@@ -278,7 +392,13 @@ function EditTransaction() {
                 name="type"
                 value={transaction.type}
                 onChange={handleChange}
-                className="w-full cursor-pointer border border-red-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-red-400 focus:outline-none   "
+                className={`w-full cursor-pointer border rounded-lg px-3 py-2 focus:ring-2 focus:outline-none
+                  ${
+                    softDark
+                      ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-red-500"
+                      : "border-red-300 text-gray-900 focus:ring-red-400"
+                  }
+                `}
               >
                 <option value="Income">Income</option>
                 <option value="Expense">Expense</option>
@@ -286,12 +406,23 @@ function EditTransaction() {
             </div>
 
             {/* Category Dropdown */}
-            <div className="bg-linear-to-br from-yellow-50 to-yellow-100 rounded-xl p-6 border-2 border-yellow-200 shadow-sm">
+            <div
+              className={`rounded-xl p-6 border-2 shadow-sm
+                ${
+                  softDark
+                    ? "bg-gray-800 border-gray-600"
+                    : "bg-linear-to-br from-yellow-50 to-yellow-100 border-yellow-200"
+                }
+              `}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-yellow-500 rounded-lg">
                   <Tag className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide
+                    ${softDark ? "text-gray-300" : "text-gray-600"}`}
+                >
                   Category
                 </span>
               </div>
@@ -299,7 +430,13 @@ function EditTransaction() {
                 name="category"
                 value={transaction.category}
                 onChange={handleChange}
-                className="w-full cursor-pointer border border-yellow-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                className={`w-full cursor-pointer border rounded-lg px-3 py-2 focus:ring-2 focus:outline-none
+                  ${
+                    softDark
+                      ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-yellow-500"
+                      : "border-yellow-300 text-gray-900 focus:ring-yellow-400"
+                  }
+                `}
               >
                 <option value="">Select Category</option>
                 {(transaction.type === "Income"
@@ -314,12 +451,23 @@ function EditTransaction() {
             </div>
 
             {/* Created At */}
-            <div className="bg-linear-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 border-2 border-indigo-200 shadow-sm">
+            <div
+              className={`rounded-xl p-6 border-2 shadow-sm
+                ${
+                  softDark
+                    ? "bg-gray-800 border-gray-600"
+                    : "bg-linear-to-br from-indigo-50 to-indigo-100 border-indigo-200"
+                }
+              `}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-indigo-500 rounded-lg">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide
+                    ${softDark ? "text-gray-300" : "text-gray-600"}`}
+                >
                   Created At
                 </span>
               </div>
@@ -327,18 +475,35 @@ function EditTransaction() {
                 type="text"
                 value={formatDateTime(transaction.createdAt)}
                 disabled
-                className="w-full bg-gray-100 border border-indigo-300 rounded-lg px-3 py-2 text-gray-600 cursor-not-allowed"
+                className={`w-full border rounded-lg px-3 py-2 cursor-not-allowed
+                  ${
+                    softDark
+                      ? "bg-gray-700 border-gray-600 text-gray-400"
+                      : "bg-gray-100 border-indigo-300 text-gray-600"
+                  }
+                `}
               />
             </div>
           </div>
 
           {/* Description */}
-          <div className="bg-linear-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200 shadow-sm mb-8 mx-8">
+          <div
+            className={`rounded-xl p-6 border-2 shadow-sm mb-8 mx-8
+              ${
+                softDark
+                  ? "bg-gray-800 border-gray-600"
+                  : "bg-linear-to-br from-gray-50 to-gray-100 border-gray-200"
+              }
+            `}
+          >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-gray-500 rounded-lg">
                 <FileText className="w-5 h-5 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+              <span
+                className={`text-sm font-medium uppercase tracking-wide
+                  ${softDark ? "text-gray-300" : "text-gray-600"}`}
+              >
                 Description
               </span>
             </div>
@@ -347,7 +512,13 @@ function EditTransaction() {
               value={transaction.description || ""}
               onChange={handleChange}
               rows={4}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none"
+              className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:outline-none
+                ${
+                  softDark
+                    ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-gray-500"
+                    : "border-gray-300 text-gray-900 focus:ring-gray-400"
+                }
+              `}
             />
           </div>
 
