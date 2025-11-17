@@ -71,6 +71,7 @@ function Signup() {
 
       toast.success(res.data.message)
       setUser(res.data.user)
+      localStorage.setItem('emailForVerification', formData.email);
       navigateTo('/verify-otp')
       setFormData({ name: '', email: '', password: '', confirmPassword: '' })
     } catch (error) {

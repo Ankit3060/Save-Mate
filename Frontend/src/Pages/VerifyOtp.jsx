@@ -8,7 +8,7 @@ import axios from 'axios';
 function VerifyOtp() {
   const {isAuthenticated, setUser, setIsAuthenticated, setAccessToken, accessToken} = useAuth();
 
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(localStorage.getItem('emailForVerification') || '')
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -45,6 +45,7 @@ function VerifyOtp() {
       setError("");
       setEmail("");
       setOtp("");
+      localStorage.removeItem('emailForVerification');
     } catch (err) {
       console.error("Verify OTP error:", err);
       toast.error(err.response?.data?.message || "Invalid OTP or Email");
